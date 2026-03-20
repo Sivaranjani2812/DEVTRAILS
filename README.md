@@ -1,4 +1,4 @@
-# ShiftSafe 🛡️
+# Insuregig 🛡️
 ### *"Rain shouldn't stop your income"*
 > AI-Powered Parametric Income Insurance for India's Q-Commerce Delivery Workers
 
@@ -8,8 +8,8 @@
 ![TailwindCSS](https://img.shields.io/badge/TailwindCSS-3.0-38BDF8?logo=tailwindcss)
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-Supabase-4169E1?logo=postgresql)
 
-📁 **GitHub:** https://github.com/rakshiga06/ShiftSafe-your-income-protected.git
-🎥 **Demo Video:** https://youtu.be/YOUR_VIDEO_ID
+📁 **GitHub:** https://github.com/Sivaranjani2812/DEVTRAILS.git
+🎥 **Demo Video:** https://drive.google.com/drive/folders/1lEDu6X_4MenJtY6XLY5md9m8G0bDstFd
 
 ---
 
@@ -47,7 +47,7 @@ India's Q-Commerce delivery workers on **Zepto, Blinkit, and Swiggy Instamart** 
 - One disruption kills Zepto + Blinkit + Instamart income simultaneously
 - Platform app outages = zero orders even in perfect weather — nobody covers this
 
-> There is no product for India's Q-commerce delivery workers. **ShiftSafe builds it.**
+> There is no product for India's Q-commerce delivery workers. **Insuregig builds it.**
 
 ---
 
@@ -66,23 +66,23 @@ We chose **Q-Commerce delivery partners** because they are the most financially 
 | Savings | Less than ₹2,000 |
 | Phone | Cheap Android · Kannada default language |
 
-**Without ShiftSafe:** Rain hits at 3pm. All three platforms stop orders. Arjun sits outside the dark store and loses ₹600. This happens 15–20 times every monsoon. ₹12,000 gone. No safety net.
+**Without Insuregig:** Rain hits at 3pm. All three platforms stop orders. Arjun sits outside the dark store and loses ₹600. This happens 15–20 times every monsoon. ₹12,000 gone. No safety net.
 
-**With ShiftSafe:** Rain detected at 3:05pm. Claim auto-created. Fraud check runs. ₹500 credited to his UPI by 3:06pm. Arjun did nothing.
+**With Insuregig:** Rain detected at 3:05pm. Claim auto-created. Fraud check runs. ₹500 credited to his UPI by 3:06pm. Arjun did nothing.
 
 ---
 
 ## 💡 Our Solution
 
-ShiftSafe is a **mobile-responsive web application** providing AI-enabled parametric income insurance for Q-commerce workers. Workers pay ₹49–149/week. Our system monitors 6 disruption triggers 24/7. When a trigger fires, claims are created and paid automatically — under 60 seconds, zero worker action.
+Insuregig is a **mobile-responsive web application** providing AI-enabled parametric income insurance for Q-commerce workers. Workers pay ₹49–149/week. Our system monitors 6 disruption triggers 24/7. When a trigger fires, claims are created and paid automatically — under 60 seconds, zero worker action.
 
-| Feature | Existing Solutions | ShiftSafe |
+| Feature | Existing Solutions | Insuregig |
 |---|---|---|
 | Payout Speed | 6–8 weeks | Under 60 seconds ⚡ |
 | Triggers Covered | Heat only | 6 disruption types |
 | AI Pricing | None | ML-powered personalised |
 | Fraud Detection | None | 5-layer AI system |
-| Platform Outage Coverage | No | Yes — unique to ShiftSafe |
+| Platform Outage Coverage | No | Yes — unique to Insuregig |
 | Language Support | English only | Tamil, Hindi, Kannada, Telugu, English |
 | Pricing Model | Annual flat fee | Weekly — matches gig cycle |
 | Budget Awareness | No | ML respects worker budget |
@@ -95,7 +95,7 @@ ShiftSafe is a **mobile-responsive web application** providing AI-enabled parame
 Worker answers 13 questions across 5 screens. ML model pulls 2 years of dark store zone weather history, combines it with all answers, generates a risk score (0–100), and recommends a weekly plan within their budget.
 
 **Step 2 — Shift Check-In (daily)**
-Worker taps "Start Shift" and selects their dark store. Coverage activates. ShiftSafe monitors weather, traffic, news, and platform status every 30 minutes silently in the background.
+Worker taps "Start Shift" and selects their dark store. Coverage activates. Insuregig monitors weather, traffic, news, and platform status every 30 minutes silently in the background.
 
 **Step 3 — Automatic Payout**
 Disruption detected → claim auto-created → 5-layer fraud check (under 5 secs) → UPI payout sent → worker notified in their language. Under 60 seconds. Worker does nothing.
@@ -118,7 +118,7 @@ All thresholds tuned specifically for Q-commerce. Rain threshold is 20mm not 50m
 | 5 | 🚫 Zone Shutdown | Confidence score > 60 | NewsAPI + TomTom Traffic | ₹500 |
 | 6 | 📱 App Outage | Platform status = outage | Mock Platform API | ₹300 |
 
-**Trigger 6 is unique to ShiftSafe.** No existing insurance covers platform outages. Zone shutdown uses 3-layer confidence scoring — NewsAPI (+40) + TomTom empty roads (+40) + government alert (+20). Fires only above 60.
+**Trigger 6 is unique to Insuregig.** No existing insurance covers platform outages. Zone shutdown uses 3-layer confidence scoring — NewsAPI (+40) + TomTom empty roads (+40) + government alert (+20). Fires only above 60.
 
 **Not covered:** Health · accidents · vehicle repairs · life insurance · non-shift hours · outside registered zone.
 
@@ -200,7 +200,7 @@ Every Monday 8am — forecast pulled per dark store zone. Each day classified LO
 ### Component 4 — Dynamic Premium Adjustment
 **Type:** Rule-based with forecast integration
 
-4+ HIGH-risk days predicted → premium +20% that week only. Worker notified 7 days in advance, can opt out. Keeps ShiftSafe sustainable during monsoon season.
+4+ HIGH-risk days predicted → premium +20% that week only. Worker notified 7 days in advance, can opt out. Keeps Insuregig sustainable during monsoon season.
 
 ---
 
@@ -233,7 +233,7 @@ Score > 60 → Auto Reject + reason sent
 > **Threat:** 500 delivery workers organized via Telegram using GPS-spoofing apps to fake locations inside red-alert weather zones, triggering mass false payouts and draining the liquidity pool instantly.
 
 ### 1. The Differentiation
-*How ShiftSafe tells a genuinely stranded worker from a bad actor*
+*How Insuregig tells a genuinely stranded worker from a bad actor*
 
 A genuine stranded worker has a **history**. A fraud account has **only a claim**.
 
@@ -261,7 +261,7 @@ A genuine stranded worker has a **history**. A fraud account has **only a claim*
 ### 3. The UX Balance
 *Handling flagged claims without penalizing honest workers*
 
-ShiftSafe uses a **Hold-not-Reject** policy. We never permanently reject without human review.
+Insuregig uses a **Hold-not-Reject** policy. We never permanently reject without human review.
 
 | Tier | Fraud Score | Action | Worker Experience |
 |---|---|---|---|
@@ -272,7 +272,7 @@ ShiftSafe uses a **Hold-not-Reject** policy. We never permanently reject without
 
 A genuine worker with a momentary GPS signal drop has weeks of shift history and a consistent behavioral profile. Their fraud score will be near zero. We penalize the **pattern of fraud** — not the imperfection of a real worker's signal.
 
-**Why ShiftSafe was already resistant before this attack:**
+**Why Insuregig was already resistant before this attack:**
 - Shift check-in happens before the disruption — a ring cannot retroactively fake it
 - Weekly premium history — new accounts that pay once and immediately claim are auto-flagged
 - Multi-worker corroboration — 500 accounts claiming city-wide simultaneously is the opposite of a real localized disruption
@@ -352,7 +352,7 @@ Isolation Forest · admin dashboard · zone map · all 5 languages · audio aler
 
 ## 💬 One Paragraph Summary
 
-ShiftSafe is an AI-powered parametric income insurance platform built specifically for India's Q-commerce delivery workers on Zepto, Blinkit, and Swiggy Instamart. Workers complete a 13-question smart onboarding in their regional language and our ML model combines their answers with 2 years of dark store zone weather history to calculate a personalised weekly premium starting at ₹49/week, always respecting the worker's stated budget. The moment any of our 6 disruption triggers fires — heavy rain, flood, extreme heat, severe pollution, zone shutdown, or platform app outage — a claim is created automatically, passes through our 5-layer AI fraud detection system, and money is credited to the worker's UPI in under 60 seconds. The worker does nothing. Existing solutions like SEWA take 6–8 weeks to pay out and cover heat only. ShiftSafe delivers in 60 seconds and covers 6 disruption types — including platform outages, which no insurance product on earth currently covers.
+Insuregig is an AI-powered parametric income insurance platform built specifically for India's Q-commerce delivery workers on Zepto, Blinkit, and Swiggy Instamart. Workers complete a 13-question smart onboarding in their regional language and our ML model combines their answers with 2 years of dark store zone weather history to calculate a personalised weekly premium starting at ₹49/week, always respecting the worker's stated budget. The moment any of our 6 disruption triggers fires — heavy rain, flood, extreme heat, severe pollution, zone shutdown, or platform app outage — a claim is created automatically, passes through our 5-layer AI fraud detection system, and money is credited to the worker's UPI in under 60 seconds. The worker does nothing. Existing solutions like SEWA take 6–8 weeks to pay out and cover heat only. Insuregig delivers in 60 seconds and covers 6 disruption types — including platform outages, which no insurance product on earth currently covers.
 
 ---
 
