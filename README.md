@@ -322,10 +322,10 @@ React prototype · FastAPI mock endpoints · mock weather API · demo control pa
 |---|---|---|
 | GitHub repo + architecture | Sivaranjani | ✅ Done |
 | Landing page + Onboarding UI | Rakshiga | 🔄 In Progress |
-| Worker Dashboard + Policy UI | Subiksha | ✅ Done |
+| Worker Dashboard + Policy UI | Subhiksha | ✅ Done |
 | FastAPI endpoints (mock data) | Sivaranjani | 🔄 In Progress |
-| Mock weather + trigger engine | Subiksha | ⏳ Pending |
-| README + Demo video | BhavanaSai + All | ✅ Done |
+| Mock weather + trigger engine | Subhiksha | ⏳ Pending |
+| README + Demo video | Bhavana Sai + All | ✅ Done |
 
 ### Phase 2 — Scale (Weeks 3–4) · April 4
 Firebase OTP · real weather APIs · APScheduler trigger engine · Razorpay payments · fraud detection layers 1–4 · ML risk scorer
@@ -341,8 +341,8 @@ Isolation Forest · admin dashboard · zone map · all 5 languages · audio aler
 |---|---|---|
 | Sivaranjani | Backend Lead | FastAPI, PostgreSQL, APIs, APScheduler, Razorpay |
 | Rakshiga | Frontend Lead | Landing, Onboarding, Dashboard, Policy, Video |
-| Subiksha | AI/ML + Frontend | Risk Scorer, Fraud Detector, Weather API, Admin UI |
-| BhavanaSai | Product + Frontend | Claims page, Analytics, Multilingual, README |
+| Subhiksha | AI/ML + Frontend | Risk Scorer, Fraud Detector, Weather API, Admin UI |
+| Bhavana Sai | Product + Frontend | Claims page, Analytics, Multilingual, README |
 
 **University:** Shiv Nadar University, Chennai
 **Hackathon:** Guidewire DEVTrails 2026 — Unicorn Chase
