@@ -20,7 +20,7 @@ const Subscription = () => {
   const [status, setStatus] = useState<"idle" | "processing" | "success">("idle");
 
   useEffect(() => {
-    const plan = localStorage.getItem("Shiftsafe_selected_plan");
+    const plan = localStorage.getItem("InsureGig_selected_plan");
     if (plan && plans[plan]) {
       setSelectedPlanId(plan);
     }
@@ -37,9 +37,9 @@ const Subscription = () => {
       setStatus("success");
       
       // Mock successful auth state globally
-      localStorage.setItem("Shiftsafe_user_id", "1");
-      localStorage.setItem("Shiftsafe_name", "Arjun");
-      localStorage.setItem("Shiftsafe_location", "HSR Layout");
+      localStorage.setItem("InsureGig_user_id", "1");
+      localStorage.setItem("InsureGig_name", "Arjun");
+      localStorage.setItem("InsureGig_location", "HSR Layout");
 
       // Redirect visually after showing success
       setTimeout(() => {
@@ -75,7 +75,7 @@ const Subscription = () => {
               >
                 <div className="text-center space-y-2 mb-8">
                   <h1 className="font-display text-3xl font-bold text-foreground">Complete Payment</h1>
-                  <p className="text-muted-foreground">Activate your Shiftsafe coverage</p>
+                  <p className="text-muted-foreground">Activate your InsureGig coverage</p>
                 </div>
 
                 {/* Plan Summary Card */}

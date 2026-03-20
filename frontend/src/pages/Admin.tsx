@@ -64,7 +64,7 @@ const Admin = () => {
         {/* Admin-specific header (no worker navbar) */}
         <nav className="sticky top-0 z-50 bg-background/95 backdrop-blur-sm border-b border-border">
           <div className="container flex items-center justify-between h-16">
-            <span className="font-display font-bold text-lg text-primary">🛡️ GigShield Admin</span>
+            <span className="font-display font-bold text-lg text-primary">🛡️ InsureGig Admin</span>
             <button onClick={handleLogout} className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground">
               <LogOut className="w-4 h-4" /> Logout
             </button>

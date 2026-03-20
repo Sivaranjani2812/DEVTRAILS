@@ -8,9 +8,9 @@ const Profile = () => {
   const navigate = useNavigate();
   
   // Fetch from localStorage or use defaults
-  const name = localStorage.getItem("Shiftsafe_name") || "Arjun K";
-  const location = localStorage.getItem("Shiftsafe_location") || "HSR Layout";
-  const plan = localStorage.getItem("Shiftsafe_selected_plan") || "Standard Plan";
+  const name = localStorage.getItem("InsureGig_name") || "Arjun K";
+  const location = localStorage.getItem("InsureGig_location") || "HSR Layout";
+  const plan = localStorage.getItem("InsureGig_selected_plan") || "Standard Plan";
   const phone = "9876543210"; // Currently mock, since it's just a demo representation
   const upiId = "arjun98@okaxis";
 
@@ -103,7 +103,7 @@ const Profile = () => {
                 Sign Out / Reset Demo
               </button>
               <p className="text-center text-xs text-muted-foreground mt-4">
-                Shiftsafe App v1.2.0
+                InsureGig App v1.2.0
               </p>
             </div>
           </div>

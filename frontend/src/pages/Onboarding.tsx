@@ -132,8 +132,8 @@ const Onboarding = () => {
       const planResp = await api.selectPlan({ user_id: userId, selected_plan: recommendedPlan });
       await api.pay({ user_id: userId });
 
-      localStorage.setItem("Shiftsafe_user_id", userId.toString());
-      localStorage.setItem("Shiftsafe_name", name);
+      localStorage.setItem("InsureGig_user_id", userId.toString());
+      localStorage.setItem("InsureGig_name", name);
 
       toast.success("Coverage activated! 🚀");
       navigate("/dashboard");

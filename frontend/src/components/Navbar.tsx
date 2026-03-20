@@ -12,12 +12,12 @@ const Navbar = () => {
   const [menuOpen, setMenuOpen] = useState(false);
   const { pathname } = useLocation();
   const navigate = useNavigate();
-  const isLoggedIn = !!localStorage.getItem("Shiftsafe_user_id");
+  const isLoggedIn = !!localStorage.getItem("InsureGig_user_id");
 
   const handleLogout = () => {
-    localStorage.removeItem("Shiftsafe_user_id");
-    localStorage.removeItem("Shiftsafe_name");
-    localStorage.removeItem("Shiftsafe_location");
+    localStorage.removeItem("InsureGig_user_id");
+    localStorage.removeItem("InsureGig_name");
+    localStorage.removeItem("InsureGig_location");
     navigate("/");
   };
 
@@ -26,7 +26,7 @@ const Navbar = () => {
       <div className="container flex items-center justify-between h-16">
         <Link to="/" className="flex items-center gap-2 font-display font-bold text-lg text-primary">
           <Shield className="w-6 h-6" />
-          Shiftsafe
+          InsureGig
         </Link>
 
         <div className="hidden md:flex items-center gap-1">

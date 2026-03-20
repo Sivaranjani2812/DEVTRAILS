@@ -34,7 +34,7 @@ const AdminLogin = () => {
           <div className="text-center mb-8">
             <div className="flex items-center justify-center gap-2 mb-3">
               <Shield className="w-8 h-8 text-primary" />
-              <span className="font-display font-bold text-2xl text-primary">GigShield</span>
+              <span className="font-display font-bold text-2xl text-primary">InsureGig</span>
             </div>
             <h1 className="font-display text-xl font-bold text-foreground">Admin Portal</h1>
             <p className="text-sm text-muted-foreground mt-1">Sign in to manage claims and workers</p>
@@ -52,7 +52,7 @@ const AdminLogin = () => {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 className="w-full border border-input rounded-lg px-4 py-3 text-sm bg-background focus:outline-none focus:ring-2 focus:ring-primary"
-                placeholder="admin@gigshield.in"
+                placeholder="admin@insuregig.in"
               />
               {errors.email && <p className="text-xs text-danger mt-1">{errors.email}</p>}
             </div>
@@ -78,7 +78,7 @@ const AdminLogin = () => {
             </button>
 
             <p className="text-xs text-center text-muted-foreground">
-              This portal is for GigShield administrators only.
+              This portal is for InsureGig administrators only.
             </p>
           </form>
         </div>

@@ -36,7 +36,7 @@ const RiskAnalysis = () => {
 
   const handleActivate = () => {
     // Proceed to subscription/payment flow. We pass the plan in state or localStorage
-    localStorage.setItem("Shiftsafe_selected_plan", selectedPlan);
+    localStorage.setItem("InsureGig_selected_plan", selectedPlan);
     navigate("/subscription");
   };
 
@@ -165,7 +165,7 @@ const RiskAnalysis = () => {
                   Activate Plan →
                 </button>
                 <p className="text-center text-xs text-muted-foreground mt-4">
-                  Powered by Shiftsafe AI Engine
+                  Powered by InsureGig AI Engine
                 </p>
               </div>
             </motion.div>

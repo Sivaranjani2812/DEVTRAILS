@@ -44,9 +44,9 @@ const Dashboard = () => {
   const [userData, setUserData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
-  const userId = localStorage.getItem("Shiftsafe_user_id");
-  const userName = localStorage.getItem("Shiftsafe_name") || "Worker";
-  const userLocation = localStorage.getItem("Shiftsafe_location") || "HSR Layout";
+  const userId = localStorage.getItem("InsureGig_user_id");
+  const userName = localStorage.getItem("InsureGig_name") || "Worker";
+  const userLocation = localStorage.getItem("InsureGig_location") || "HSR Layout";
 
   useEffect(() => {
     if (!userId) {
