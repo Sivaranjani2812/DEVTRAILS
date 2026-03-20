@@ -18,7 +18,7 @@
 ## 📌 Table of Contents
 1. [The Problem](#the-problem)
 2. [Our Solution](#our-solution)
-3. [User Persona](#user-persona)
+3. [Our User Persona](#user-persona)
 4. [How It Works](#how-it-works)
 5. [Parametric Triggers](#parametric-triggers)
 6. [Weekly Premium Model](#weekly-premium-model)
@@ -103,7 +103,7 @@ ShiftSafe is a **mobile-responsive web application** that provides AI-enabled pa
 Worker answers 13 targeted questions across 5 simple screens. ML model combines their answers with 2 years of dark store zone weather history to calculate a personalised weekly premium. Worker sees the AI's reasoning and activates their plan.
 
 **Step 2 — Stay Protected**
-Worker pays weekly (₹49 / ₹89 / ₹149) and taps "Start Shift" when they begin working. ShiftSafe watches their dark store zone 24/7 — weather, traffic, news, and platform status simultaneously.
+Worker pays weekly and taps "Start Shift" when they begin working. ShiftSafe watches their dark store zone 24/7 — weather, traffic, news, and platform status simultaneously.
 
 **Step 3 — Get Paid Automatically**
 The moment a disruption is detected:
@@ -137,6 +137,23 @@ The moment a disruption is detected:
 ---
 
 ## 👤 User Persona
+## Our Chosen Persona
+
+We chose **Q-Commerce delivery partners** — workers
+delivering for Zepto, Blinkit, and Swiggy Instamart.
+
+Out of all delivery categories, Q-commerce workers
+are the most financially vulnerable and the most
+completely ignored by every existing insurance product.
+
+We chose Q-commerce because they need ShiftSafe the
+most, they are underserved the most, and the problem
+is most precisely solvable for them. The specificity
+of their work pattern — fixed dark stores, 10-minute
+SLAs, multi-platform dependency — actually makes our
+AI more accurate, our triggers more precise, and our
+fraud detection more reliable than it would be for
+any other delivery persona.
 
 ### Meet Arjun 👦
 
@@ -233,8 +250,6 @@ STEP 1 — SMART ONBOARDING (3 minutes)
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 Worker opens ShiftSafe on phone browser
-↓
-Selects language (Tamil / Hindi / Kannada / Telugu / English)
 ↓
 Answers 13 questions across 5 simple screens:
 
@@ -583,7 +598,7 @@ How ShiftSafe stays sustainable:
 ## 🤖 AI/ML Integration Plan
 
 ShiftSafe uses AI/ML in **4 distinct components**.
-
+![ShiftSafe AI/ML Map](./AI_ML_MAP.png)
 ### Component 1 — ML Risk Scorer
 
 - **Type:** Random Forest Regressor
@@ -900,7 +915,7 @@ We chose a **mobile-responsive web application** over a native mobile app for th
 ---
 
 - **University:** [Shiv Nadar University, Chennai]
-- **Hackathon:** Guidewire DEVTrails 2026 — Unicorn Chase
+- **Hackathon:** Guidewire DEVTrails 2026
 - **Persona:** Q-Commerce Delivery Partners (Zepto, Blinkit, Swiggy Instamart)
 
 ---
