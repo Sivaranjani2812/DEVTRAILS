@@ -7,7 +7,7 @@ import DemoFab from "@/components/DemoFab";
 
 const slides = [
   {
-    title: "InstaShield",
+    title: "Shiftsafe",
     subtitle: "Welcome to the future of income protection",
     desc: "Smart parametric insurance built exclusively for delivery partners.",
     icon: <Shield className="w-40 h-40 text-primary drop-shadow-xl" />,

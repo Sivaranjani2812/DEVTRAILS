@@ -36,7 +36,7 @@ const RiskAnalysis = () => {
 
   const handleActivate = () => {
     // Proceed to subscription/payment flow. We pass the plan in state or localStorage
-    localStorage.setItem("InstaShield_selected_plan", selectedPlan);
+    localStorage.setItem("Shiftsafe_selected_plan", selectedPlan);
     navigate("/subscription");
   };
 
@@ -165,7 +165,7 @@ const RiskAnalysis = () => {
                   Activate Plan →
                 </button>
                 <p className="text-center text-xs text-muted-foreground mt-4">
-                  Powered by InstaShield AI Engine
+                  Powered by Shiftsafe AI Engine
                 </p>
               </div>
             </motion.div>

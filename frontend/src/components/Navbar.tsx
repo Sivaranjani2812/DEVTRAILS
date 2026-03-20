@@ -3,7 +3,6 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Shield, Menu, X, LogOut } from "lucide-react";
 
 const navLinks = [
-  { to: "/", label: "Home" },
   { to: "/profile", label: "Profile" },
   { to: "/dashboard", label: "Dashboard" },
   { to: "/claims", label: "Claims" },
@@ -13,12 +12,12 @@ const Navbar = () => {
   const [menuOpen, setMenuOpen] = useState(false);
   const { pathname } = useLocation();
   const navigate = useNavigate();
-  const isLoggedIn = !!localStorage.getItem("InstaShield_user_id");
+  const isLoggedIn = !!localStorage.getItem("Shiftsafe_user_id");
 
   const handleLogout = () => {
-    localStorage.removeItem("InstaShield_user_id");
-    localStorage.removeItem("InstaShield_name");
-    localStorage.removeItem("InstaShield_location");
+    localStorage.removeItem("Shiftsafe_user_id");
+    localStorage.removeItem("Shiftsafe_name");
+    localStorage.removeItem("Shiftsafe_location");
     navigate("/");
   };
 
@@ -27,7 +26,7 @@ const Navbar = () => {
       <div className="container flex items-center justify-between h-16">
         <Link to="/" className="flex items-center gap-2 font-display font-bold text-lg text-primary">
           <Shield className="w-6 h-6" />
-          InstaShield
+          Shiftsafe
         </Link>
 
         <div className="hidden md:flex items-center gap-1">

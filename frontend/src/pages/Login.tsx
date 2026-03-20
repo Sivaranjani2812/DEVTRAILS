@@ -62,7 +62,6 @@ const Login = () => {
   return (
     <PageTransition>
       <div className="min-h-screen bg-background relative overflow-hidden flex flex-col items-center">
-        <Navbar />
         <DemoFab />
 
         {/* Ambient background glows */}

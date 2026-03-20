@@ -132,8 +132,8 @@ const Onboarding = () => {
       const planResp = await api.selectPlan({ user_id: userId, selected_plan: recommendedPlan });
       await api.pay({ user_id: userId });
 
-      localStorage.setItem("InstaShield_user_id", userId.toString());
-      localStorage.setItem("InstaShield_name", name);
+      localStorage.setItem("Shiftsafe_user_id", userId.toString());
+      localStorage.setItem("Shiftsafe_name", name);
 
       toast.success("Coverage activated! 🚀");
       navigate("/dashboard");
@@ -149,7 +149,6 @@ const Onboarding = () => {
   return (
     <PageTransition>
       <div className="min-h-screen bg-muted">
-        <Navbar />
         <DemoFab />
         <div className="container max-w-2xl py-10">
           {/* Progress */}
