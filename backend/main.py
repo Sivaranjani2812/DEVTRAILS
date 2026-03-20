@@ -16,6 +16,8 @@ from app.schemas import (
     DashboardResponse,
     OnboardRequest,
     OnboardResponse,
+    LoginRequest,
+    LoginResponse,
     PayRequest,
     PayResponse,
     SelectPlanRequest,
@@ -120,6 +122,8 @@ def onboard(req: OnboardRequest, db: Session = Depends(get_db)) -> OnboardRespon
     recommended_plan = recommended_plan_from_risk(risk_score)
 
     user = User(
+        name=req.name,
+        phone=req.phone,
         location=req.location,
         platform=req.platform,
         shift=req.shift,
@@ -131,6 +135,15 @@ def onboard(req: OnboardRequest, db: Session = Depends(get_db)) -> OnboardRespon
     db.refresh(user)
 
     return OnboardResponse(user_id=user.id, risk_score=risk_score, recommended_plan=recommended_plan)
+
+
+@app.post("/login", response_model=LoginResponse)
+def login(req: LoginRequest, db: Session = Depends(get_db)) -> LoginResponse:
+    user = db.query(User).filter(User.phone == req.phone).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    return LoginResponse(user_id=user.id, name=user.name or "Worker", location=user.location)
 
 
 @app.post("/select-plan", response_model=SelectPlanResponse)

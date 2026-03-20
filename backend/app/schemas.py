@@ -7,11 +7,21 @@ from pydantic import BaseModel, Field
 
 
 class OnboardRequest(BaseModel):
+    name: str = Field(..., min_length=1, max_length=200)
+    phone: str = Field(..., min_length=10, max_length=20)
     location: str = Field(..., min_length=1, max_length=200)
     platform: str = Field(..., min_length=1, max_length=200)
     days_per_week: int = Field(..., ge=1, le=7)
     shift: str = Field(..., min_length=1, max_length=100)
     weekly_income: float = Field(..., ge=0)
+
+class LoginRequest(BaseModel):
+    phone: str = Field(..., min_length=10, max_length=20)
+
+class LoginResponse(BaseModel):
+    user_id: int
+    name: str
+    location: str
 
 
 class OnboardResponse(BaseModel):
