@@ -4,8 +4,7 @@ import { Shield, Menu, X, LogOut } from "lucide-react";
 
 const navLinks = [
   { to: "/", label: "Home" },
-  { to: "/onboarding", label: "Get Protected" },
-  { to: "/login", label: "Login" },
+  { to: "/profile", label: "Profile" },
   { to: "/dashboard", label: "Dashboard" },
   { to: "/claims", label: "Claims" },
 ];
@@ -14,12 +13,12 @@ const Navbar = () => {
   const [menuOpen, setMenuOpen] = useState(false);
   const { pathname } = useLocation();
   const navigate = useNavigate();
-  const isLoggedIn = !!localStorage.getItem("gigshield_user_id");
+  const isLoggedIn = !!localStorage.getItem("InstaShield_user_id");
 
   const handleLogout = () => {
-    localStorage.removeItem("gigshield_user_id");
-    localStorage.removeItem("gigshield_name");
-    localStorage.removeItem("gigshield_location");
+    localStorage.removeItem("InstaShield_user_id");
+    localStorage.removeItem("InstaShield_name");
+    localStorage.removeItem("InstaShield_location");
     navigate("/");
   };
 
@@ -28,7 +27,7 @@ const Navbar = () => {
       <div className="container flex items-center justify-between h-16">
         <Link to="/" className="flex items-center gap-2 font-display font-bold text-lg text-primary">
           <Shield className="w-6 h-6" />
-          GigShield
+          InstaShield
         </Link>
 
         <div className="hidden md:flex items-center gap-1">

@@ -12,6 +12,9 @@ import AdminLogin from "./pages/AdminLogin";
 import Admin from "./pages/Admin";
 import Demo from "./pages/Demo";
 import NotFound from "./pages/NotFound";
+import RiskAnalysis from "./pages/RiskAnalysis";
+import Subscription from "./pages/Subscription";
+import Profile from "./pages/Profile";
 
 const queryClient = new QueryClient();
 
@@ -24,6 +27,9 @@ const App = () => (
           <Routes>
             <Route path="/" element={<Landing />} />
             <Route path="/onboarding" element={<Onboarding />} />
+            <Route path="/risk" element={<RiskAnalysis />} />
+            <Route path="/subscription" element={<Subscription />} />
+            <Route path="/profile" element={<Profile />} />
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/claims" element={<Claims />} />
             <Route path="/login" element={<Login />} />

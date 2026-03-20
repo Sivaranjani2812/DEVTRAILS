@@ -21,17 +21,15 @@ const savingsOptions = ["No savings at all", "Less than ₹2,000", "₹2,000 –
 const weatherFreqOptions = ["Rarely (1–2 times/month)", "Sometimes (3–5 times/month)", "Often (6–10 times/month)", "Very often (10+ times/month)"];
 const lossReasons = ["Heavy rain", "Flooding", "Extreme heat", "Bandh or curfew", "App going down", "Severe pollution"];
 
-const TOTAL_STEPS = 5;
+const TOTAL_STEPS = 3;
 
 const Onboarding = () => {
   const navigate = useNavigate();
   const [step, setStep] = useState(1);
 
   useEffect(() => {
-    if (localStorage.getItem("gigshield_user_id")) {
-      navigate("/dashboard");
-    }
-  }, [navigate]);
+    // Removed automatic redirect to dashboard so questions can be viewed during the demo funnel.
+  }, []);
 
   // Step 1 - Identity
   const [name, setName] = useState("");
@@ -114,46 +112,16 @@ const Onboarding = () => {
     setErrors({});
     if (step === 1 && !validateStep1()) return;
     if (step === 2 && !validateStep2()) return;
-    if (step === 4 && !validateStep4()) return;
     setStep(step + 1);
   };
 
   const handleSubmit = async () => {
-    if (!validateStep5()) return;
     setCalculating(true);
-
-    try {
-      const onboardData = {
-        name: name,
-        phone: phone,
-        location: selectedZones[0] || "HSR Layout",
-        platform: selectedPlatforms[0] || "Swiggy",
-        shift: shift,
-        weekly_income: earnings,
-        days_per_week: workDays.includes("3") ? 4 : workDays.includes("5") ? 6 : 7,
-      };
-
-      const response = await api.onboard(onboardData);
-      setUserId(response.user_id);
-      localStorage.setItem("gigshield_location", onboardData.location);
-      setRecommendedPlan(response.recommended_plan);
-
-      // We still simulate a bit of a calculation delay for UX.
-      setTimeout(() => {
-        // Use the risk score from response to determine premium if not fully driven by backend yet.
-        // Actually, let's just use the recommended_plan from API (Basic/Pro/Elite).
-        const premiumMap: Record<string, number> = {
-          Basic: 49,
-          Standard: 72,
-          Premium: 99,
-        };
-        setPremium(premiumMap[response.recommended_plan] || 49);
-        setCalculating(false);
-      }, 1500);
-    } catch (err: any) {
-      toast.error(err.message || "Onboarding failed");
+    // Simulate calculating ML risk
+    setTimeout(() => {
       setCalculating(false);
-    }
+      navigate("/risk");
+    }, 1500);
   };
 
   const activateCoverage = async () => {
@@ -164,8 +132,8 @@ const Onboarding = () => {
       const planResp = await api.selectPlan({ user_id: userId, selected_plan: recommendedPlan });
       await api.pay({ user_id: userId });
 
-      localStorage.setItem("gigshield_user_id", userId.toString());
-      localStorage.setItem("gigshield_name", name);
+      localStorage.setItem("InstaShield_user_id", userId.toString());
+      localStorage.setItem("InstaShield_name", name);
 
       toast.success("Coverage activated! 🚀");
       navigate("/dashboard");
@@ -425,15 +393,15 @@ const Onboarding = () => {
                 ← Back
               </button>
             )}
-            {step < 5 ? (
+            {step < 3 ? (
               <button onClick={handleNext} className="flex-1 bg-primary text-primary-foreground rounded-lg py-3 text-sm font-semibold hover:opacity-90 transition-opacity">
                 Next →
               </button>
-            ) : premium === null && !calculating ? (
-              <button onClick={handleSubmit} className="flex-1 bg-primary text-primary-foreground rounded-lg py-3 text-sm font-semibold hover:opacity-90 transition-opacity">
-                Calculate My Premium →
+            ) : (
+              <button onClick={handleSubmit} disabled={calculating} className="flex-1 bg-primary text-primary-foreground rounded-lg py-3 text-sm font-semibold hover:opacity-90 transition-opacity flex items-center justify-center gap-2">
+                {calculating ? <Loader2 className="w-4 h-4 animate-spin" /> : "Calculate My Protection →"}
               </button>
-            ) : null}
+            )}
           </div>
         </div>
       </div>
