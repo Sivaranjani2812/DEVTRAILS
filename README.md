@@ -598,7 +598,7 @@ How ShiftSafe stays sustainable:
 ## 🤖 AI/ML Integration Plan
 
 ShiftSafe uses AI/ML in **4 distinct components**.
-![ShiftSafe AI/ML Map](./AI_ML_MAP.png)
+![ShiftSafe AI/ML Map](./assets/AI_ML_MAP.png)
 ### Component 1 — ML Risk Scorer
 
 - **Type:** Random Forest Regressor
