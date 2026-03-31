@@ -1,125 +1,224 @@
-import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import { motion, AnimatePresence } from "framer-motion";
-import { Shield, CloudLightning, Zap, ArrowRight, CheckCircle2 } from "lucide-react";
-import PageTransition from "@/components/PageTransition";
-import DemoFab from "@/components/DemoFab";
-
-const slides = [
-  {
-    title: "InsureGig",
-    subtitle: "Welcome to the future of income protection",
-    desc: "Smart parametric insurance built exclusively for delivery partners.",
-    icon: <Shield className="w-40 h-40 text-primary drop-shadow-xl" />,
-    bg: "bg-accent/10"
-  },
-  {
-    title: "Weather the Storm",
-    subtitle: "24/7 Zone Monitoring",
-    desc: "We automatically track rain, floods, and gridlocks in your delivery zones.",
-    icon: <CloudLightning className="w-40 h-40 text-accent drop-shadow-xl" />,
-    bg: "bg-primary/5"
-  },
-  {
-    title: "Instant Payouts",
-    subtitle: "Zero Paperwork",
-    desc: "No claims to file. When a disruption hits, money reaches your UPI in 60 seconds flat.",
-    icon: <Zap className="w-40 h-40 text-warning drop-shadow-xl" />,
-    bg: "bg-warning/10"
-  },
-  {
-    title: "Ready to Ride?",
-    subtitle: "Protect your income today",
-    desc: "Sign up in under 2 minutes and take control of your financial security.",
-    icon: <CheckCircle2 className="w-40 h-40 text-success drop-shadow-xl" />,
-    bg: "bg-success/10"
-  }
-];
+import React, { useState, useEffect } from "react";
+import { useNavigate, Link } from "react-router-dom";
+import { Shield, Zap, CalendarDays } from "lucide-react";
+import { useAuth } from "../context/AuthContext";
+import toast from "react-hot-toast";
 
 const Landing = () => {
-  const [currentSlide, setCurrentSlide] = useState(0);
   const navigate = useNavigate();
+  const { user, login, verifyOtp } = useAuth();
+  
+  const [phone, setPhone] = useState("");
+  const [otpSent, setOtpSent] = useState(false);
+  const [otp, setOtp] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [timer, setTimer] = useState(60);
 
-  const nextSlide = () => {
-    if (currentSlide < slides.length - 1) {
-      setCurrentSlide(currentSlide + 1);
-    } else {
-      navigate("/login");
+  useEffect(() => {
+    if (user) {
+      navigate(user.role === "admin" ? "/admin" : "/dashboard");
     }
+  }, [user, navigate]);
+
+  useEffect(() => {
+    let interval: NodeJS.Timeout;
+    if (otpSent && timer > 0) {
+      interval = setInterval(() => setTimer((t) => t - 1), 1000);
+    }
+    return () => clearInterval(interval);
+  }, [otpSent, timer]);
+
+  const handleSendOtp = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (phone.length < 10) {
+      toast.error("Please enter a valid 10-digit phone number");
+      return;
+    }
+    setLoading(true);
+    const success = await login(`+91${phone}`);
+    if (success) {
+      setOtpSent(true);
+      setTimer(60);
+      toast.success("OTP sent successfully!");
+    } else {
+      toast.error("Failed to send OTP");
+    }
+    setLoading(false);
+  };
+
+  const handleVerifyOtp = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (otp.length !== 6) {
+      toast.error("Please enter a valid 6-digit OTP");
+      return;
+    }
+    setLoading(true);
+    const success = await verifyOtp(`+91${phone}`, otp);
+    if (success) {
+      toast.success("Login successful!");
+      // Navigation is handled by the useEffect above when `user` changes
+    } else {
+      toast.error("Invalid OTP");
+    }
+    setLoading(false);
   };
 
   return (
-    <PageTransition>
-      <div className={`min-h-screen transition-colors duration-700 flex flex-col items-center justify-center relative overflow-hidden ${slides[currentSlide].bg}`}>
-        <DemoFab />
-        
-        {/* Background glow effects */}
-        <div className="absolute top-[-20%] left-[-10%] w-[50%] h-[50%] bg-white/40 blur-[100px] rounded-full pointer-events-none" />
-        <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-primary/10 blur-[100px] rounded-full pointer-events-none" />
+    <div className="min-h-screen flex flex-col md:flex-row bg-[#F8FAFC]">
+      {/* Left Panel */}
+      <div className="w-full md:w-[55%] bg-[#0F172A] text-white p-8 md:p-16 lg:p-24 flex flex-col justify-between">
+        <div className="flex items-center gap-2 mb-16 md:mb-0">
+          <Shield className="w-8 h-8 text-white" />
+          <span className="font-bold text-2xl tracking-tight">InsureGig</span>
+        </div>
 
-        <div className="w-full max-w-md px-6 z-10 flex flex-col h-[80vh] justify-between">
-          
-          {/* Progress Indication */}
-          <div className="flex gap-2 justify-center pt-8">
-            {slides.map((_, i) => (
-              <div 
-                key={i} 
-                className={`h-2 rounded-full transition-all duration-500 ${i === currentSlide ? "w-8 bg-primary" : "w-2 bg-primary/20"}`}
-              />
-            ))}
-          </div>
+        <div className="flex-1 flex flex-col justify-center max-w-xl">
+          <h1 className="text-[32px] md:text-[40px] font-[800] leading-tight mb-6">
+            Your income deserves a safety net.
+          </h1>
+          <p className="text-[16px] text-[#94A3B8] leading-relaxed mb-10">
+            Parametric insurance built for Zepto & Blinkit delivery partners. Get
+            paid when disruptions stop you from working.
+          </p>
 
-          {/* Slide Content */}
-          <div className="flex-1 flex flex-col items-center justify-center text-center">
-            <AnimatePresence mode="wait">
-              <motion.div
-                key={currentSlide}
-                initial={{ opacity: 0, scale: 0.8, y: 20 }}
-                animate={{ opacity: 1, scale: 1, y: 0 }}
-                exit={{ opacity: 0, scale: 1.1, y: -20 }}
-                transition={{ duration: 0.4 }}
-                className="flex flex-col items-center"
-              >
-                <motion.div 
-                  initial={{ y: 0 }} 
-                  animate={{ y: [-10, 10, -10] }} 
-                  transition={{ repeat: Infinity, duration: 4, ease: "easeInOut" }}
-                  className="mb-10 bg-white p-8 rounded-full shadow-[0_8px_30px_rgb(0,0,0,0.08)]"
-                >
-                  {slides[currentSlide].icon}
-                </motion.div>
-                
-                <h1 className="font-display text-4xl font-bold text-foreground mb-2">
-                  {slides[currentSlide].title}
-                </h1>
-                <h2 className="text-lg font-bold text-primary mb-4">
-                  {slides[currentSlide].subtitle}
-                </h2>
-                <p className="text-muted-foreground text-lg leading-relaxed max-w-[280px]">
-                  {slides[currentSlide].desc}
-                </p>
-              </motion.div>
-            </AnimatePresence>
-          </div>
-
-          {/* Action Button */}
-          <div className="pb-8 w-full">
-            <button 
-              onClick={nextSlide}
-              className="w-full bg-primary text-white py-4 rounded-full font-bold text-lg hover:shadow-xl hover:shadow-primary/30 hover:-translate-y-1 transition-all flex items-center justify-center gap-2"
-            >
-              {currentSlide === slides.length - 1 ? "Get Started" : "Continue"}
-              <ArrowRight className="w-5 h-5" />
-            </button>
-            <div className="mt-6 text-center">
-              <Link to="/login" className="text-primary font-bold hover:underline">
-                Already have an account? Log in
-              </Link>
+          <div className="space-y-6">
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 rounded-full bg-[#1E293B] flex items-center justify-center">
+                <Shield className="w-6 h-6 text-[#2563EB]" />
+              </div>
+              <span className="text-[16px] font-medium">
+                Zero-touch claims — auto-triggered
+              </span>
+            </div>
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 rounded-full bg-[#1E293B] flex items-center justify-center">
+                <Zap className="w-6 h-6 text-[#D97706]" />
+              </div>
+              <span className="text-[16px] font-medium">
+                Payouts in under 60 seconds
+              </span>
+            </div>
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 rounded-full bg-[#1E293B] flex items-center justify-center">
+                <CalendarDays className="w-6 h-6 text-[#059669]" />
+              </div>
+              <span className="text-[16px] font-medium">
+                Weekly coverage from ₹35
+              </span>
             </div>
           </div>
         </div>
+
+        <div className="mt-16 md:mt-0 pt-8 border-t border-[#1E293B]">
+          <p className="text-[#94A3B8] text-[14px]">
+            <span className="font-semibold text-white">1,200+</span> workers protected ·{" "}
+            <span className="font-semibold text-white">₹4.8L</span> paid out · Powered by
+            parametric AI
+          </p>
+        </div>
       </div>
-    </PageTransition>
+
+      {/* Right Panel */}
+      <div className="w-full md:w-[45%] bg-white flex items-center justify-center p-8 md:p-12 lg:p-24 relative shadow-[-10px_0_30px_rgba(0,0,0,0.05)] border-l border-[#E2E8F0] z-10">
+        <div className="w-full max-w-md">
+          <div className="mb-8">
+            <h2 className="text-[24px] font-[700] text-[#0F172A] mb-2">
+              Welcome back
+            </h2>
+            <div className="flex items-center gap-2">
+              <p className="text-[#64748B] text-[15px]">New here?</p>
+              <button
+                onClick={() => navigate("/onboarding")}
+                className="text-[#2563EB] font-medium text-[15px] hover:text-[#1D4ED8]"
+              >
+                Register →
+              </button>
+            </div>
+          </div>
+
+          {!otpSent ? (
+            <form onSubmit={handleSendOtp} className="space-y-6">
+              <div>
+                <label className="block text-[12px] font-[500] text-[#94A3B8] uppercase tracking-wide mb-2">
+                  Phone Number
+                </label>
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                    <span className="text-[#64748B] font-medium">+91</span>
+                  </div>
+                  <input
+                    type="tel"
+                    maxLength={10}
+                    value={phone}
+                    onChange={(e) => setPhone(e.target.value.replace(/\D/g, ""))}
+                    className="input-base pl-14"
+                    placeholder="Enter 10-digit number"
+                    disabled={loading}
+                    required
+                  />
+                </div>
+              </div>
+
+              <button
+                type="submit"
+                className="btn-primary w-full shadow-lg shadow-[#2563EB]/20"
+                disabled={loading || phone.length < 10}
+              >
+                {loading ? "Sending..." : "Send OTP"}
+              </button>
+            </form>
+          ) : (
+            <form onSubmit={handleVerifyOtp} className="space-y-6">
+              <div>
+                <label className="block text-[12px] font-[500] text-[#94A3B8] uppercase tracking-wide mb-2">
+                  Enter 6-digit OTP
+                </label>
+                <input
+                  type="text"
+                  maxLength={6}
+                  value={otp}
+                  onChange={(e) => setOtp(e.target.value.replace(/\D/g, ""))}
+                  className="input-base text-center tracking-widest text-lg font-medium"
+                  placeholder="• • • • • •"
+                  disabled={loading}
+                  required
+                />
+              </div>
+
+              <button
+                type="submit"
+                className="btn-primary w-full shadow-lg shadow-[#2563EB]/20"
+                disabled={loading || otp.length !== 6}
+              >
+                {loading ? "Verifying..." : "Verify & Login"}
+              </button>
+
+              <div className="text-center">
+                {timer > 0 ? (
+                  <p className="text-[#64748B] text-[14px]">
+                    Resend OTP in 0:{timer.toString().padStart(2, "0")}
+                  </p>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={handleSendOtp}
+                    className="text-[#2563EB] font-medium text-[14px]"
+                  >
+                    Resend OTP
+                  </button>
+                )}
+              </div>
+            </form>
+          )}
+
+          <div className="mt-8 text-center pt-8 border-t border-[#E2E8F0]">
+            <Link to="/admin/login" className="text-[#94A3B8] text-[14px] hover:text-[#64748B] font-medium">
+              I'm an admin
+            </Link>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 };
 

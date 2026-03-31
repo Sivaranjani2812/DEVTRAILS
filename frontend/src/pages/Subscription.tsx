@@ -1,201 +1,256 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { motion, AnimatePresence } from "framer-motion";
-import { Shield, CheckCircle2, Loader2, ArrowLeft } from "lucide-react";
-import Navbar from "@/components/Navbar";
-import PageTransition from "@/components/PageTransition";
-import DemoFab from "@/components/DemoFab";
+import { ShieldCheck, Check, X, Info, ArrowRight } from "lucide-react";
+import api from "../services/api";
+import { useAuth } from "../context/AuthContext";
+import Navbar from "../components/Navbar";
+import toast from "react-hot-toast";
 
-const plans: Record<string, { name: string; price: number; coverage: string }> = {
-  Basic: { name: "Basic Plan", price: 49, coverage: "₹1,500" },
-  Standard: { name: "Standard Plan", price: 89, coverage: "₹3,000" },
-  Premium: { name: "Premium Plan", price: 149, coverage: "₹5,000" }
-};
-
-const Subscription = () => {
+export default function Subscription() {
   const navigate = useNavigate();
-  const [selectedPlanId, setSelectedPlanId] = useState("Standard");
-  const [autoRenew, setAutoRenew] = useState(true);
-  const [upiId, setUpiId] = useState("");
-  const [status, setStatus] = useState<"idle" | "processing" | "success">("idle");
+  const { user } = useAuth();
+  
+  const [plans, setPlans] = useState<any[]>([]);
+  const [riskProfile, setRiskProfile] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const [activatingInfo, setActivatingInfo] = useState<string | null>(null);
+  
+  const [selectedPlanId, setSelectedPlanId] = useState<string | null>(null);
 
   useEffect(() => {
-    const plan = localStorage.getItem("InsureGig_selected_plan");
-    if (plan && plans[plan]) {
-      setSelectedPlanId(plan);
-    }
+    const fetchPolicyData = async () => {
+      try {
+        setLoading(true);
+        // Parallel requests
+        const [plansRes, riskRes] = await Promise.all([
+          api.get("/api/policies/plans"),
+          api.get("/api/workers/risk-profile")
+        ]);
+        setPlans(plansRes.data);
+        setRiskProfile(riskRes.data);
+      } catch (err: any) {
+        console.error("Policy fetch error:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchPolicyData();
   }, []);
 
-  const plan = plans[selectedPlanId];
-
-  const handlePayment = () => {
-    if (!upiId) return;
-    setStatus("processing");
-
-    // Simulate payment processing flow
-    setTimeout(() => {
-      setStatus("success");
-      
-      // Mock successful auth state globally
-      localStorage.setItem("InsureGig_user_id", "1");
-      localStorage.setItem("InsureGig_name", "Arjun");
-      localStorage.setItem("InsureGig_location", "HSR Layout");
-
-      // Redirect visually after showing success
-      setTimeout(() => {
-        navigate("/dashboard");
-      }, 1500);
-    }, 2000);
+  const handleActivate = async () => {
+    if (!selectedPlanId) return;
+    try {
+      setActivatingInfo(selectedPlanId);
+      await api.post("/api/policies/activate", { planId: selectedPlanId, workerId: user?.id });
+      toast.success("Coverage activated! Your shield is live.");
+      navigate("/dashboard");
+    } catch (err) {
+      toast.error("Failed to activate policy. Please try again.");
+    } finally {
+      setActivatingInfo(null);
+    }
   };
 
-  return (
-    <PageTransition>
-      <div className="min-h-screen bg-background relative overflow-hidden flex flex-col items-center">
+  const recommendedPlanName = riskProfile?.recommendedPlan || "Standard";
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-[#F8FAFC]">
         <Navbar />
-        <DemoFab />
+        <main className="max-w-6xl mx-auto px-4 py-12">
+           <div className="w-1/3 h-8 skeleton mb-4"></div>
+           <div className="w-2/3 h-6 skeleton mb-10"></div>
+           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {[...Array(3)].map((_, i) => (
+                <div key={i} className="h-[450px] skeleton rounded-2xl"></div>
+              ))}
+           </div>
+        </main>
+      </div>
+    );
+  }
 
-        {/* Ambient background glows */}
-        <div className="absolute top-[-20%] right-[-10%] w-[50%] h-[50%] bg-primary/10 blur-[100px] rounded-full pointer-events-none" />
-        <div className="absolute bottom-[-10%] left-[-10%] w-[50%] h-[50%] bg-accent/5 blur-[100px] rounded-full pointer-events-none" />
+  const selectedPlan = plans.find(p => p.id === selectedPlanId);
 
-        <div className="container max-w-lg py-12 px-6 z-10 w-full">
-          
-          <button onClick={() => navigate(-1)} className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors mb-6">
-            <ArrowLeft className="w-4 h-4" /> Back to Analysis
-          </button>
+  return (
+    <div className="min-h-screen bg-[#F8FAFC]">
+      <Navbar />
 
-          <AnimatePresence mode="wait">
-            {status === "idle" && (
-              <motion.div 
-                key="checkout"
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.95 }}
-                className="space-y-6"
-              >
-                <div className="text-center space-y-2 mb-8">
-                  <h1 className="font-display text-3xl font-bold text-foreground">Complete Payment</h1>
-                  <p className="text-muted-foreground">Activate your InsureGig coverage</p>
+      <main className="max-w-6xl mx-auto px-4 py-12">
+        {/* HEADER */}
+        <div className="text-center mb-10">
+          <h1 className="text-[32px] md:text-[40px] font-[800] text-[#0F172A] tracking-tight mb-3">Choose your shield</h1>
+          <p className="text-[16px] text-[#64748B] max-w-xl mx-auto">
+            Based on your risk profile, we recommend the <span className="font-bold text-[#0F172A]">{recommendedPlanName}</span> plan for optimal protection.
+          </p>
+        </div>
+
+        {/* RISK SUMMARY BAR */}
+        {riskProfile && (
+          <div className="card-base p-4 mb-8 flex flex-col md:flex-row items-center justify-between border border-[#E2E8F0] shadow-sm bg-white">
+            <div className="flex items-center gap-2 mb-4 md:mb-0">
+               <ShieldCheck className="w-5 h-5 text-[#2563EB]" />
+               <span className="text-[#0F172A] font-[600] text-[14px]">Your premium factors:</span>
+               <div className="flex gap-2 flex-wrap">
+                 {riskProfile.factors?.map((f: any, idx: number) => (
+                    <span key={idx} className="bg-[#F1F5F9] text-[#64748B] text-[12px] px-2.5 py-1 rounded-full font-medium border border-[#E2E8F0]">
+                      {f.label} ({f.multiplier})
+                    </span>
+                 ))}
+               </div>
+            </div>
+            <button className="text-[13px] font-[600] text-[#2563EB] hover:text-[#1D4ED8] flex items-center gap-1">
+              How is this calculated? <Info className="w-4 h-4" />
+            </button>
+          </div>
+        )}
+
+        {/* PLAN CARDS */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8 items-end mb-16">
+          {plans.map((plan: any) => {
+            const isStandard = plan.name === "Standard";
+            const isPremium = plan.name === "Premium";
+            
+            let cardClasses = "card-base p-6 lg:p-8 flex flex-col bg-white border border-[#E2E8F0] transition-transform";
+            if (isStandard) {
+              cardClasses = "card-base p-6 lg:p-8 flex flex-col bg-white border-2 border-[#2563EB] relative transform scale-102 lg:-translate-y-4 shadow-[0_20px_40px_rgba(37,99,235,0.1)]";
+            }
+            
+            const btnBaseClasses = "w-full py-3.5 rounded-xl font-[600] text-[15px] transition-colors flex justify-center items-center";
+            let btnClasses = `${btnBaseClasses} border-2 border-[#2563EB] text-[#2563EB] hover:bg-[#F8FAFC]`;
+            if (isStandard) btnClasses = `${btnBaseClasses} bg-[#2563EB] text-white hover:bg-[#1D4ED8] shadow-[0_8px_20px_rgba(37,99,235,0.25)]`;
+            if (isPremium) btnClasses = `${btnBaseClasses} bg-[#7C3AED] text-white hover:bg-[#6D28D9] shadow-[0_8px_20px_rgba(124,58,237,0.25)]`;
+
+            return (
+              <div key={plan.id} className={cardClasses}>
+                {isStandard && (
+                  <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-[#2563EB] text-white text-[12px] font-[700] uppercase tracking-widest px-4 py-1.5 rounded-full whitespace-nowrap shadow-md">
+                    Recommended for you
+                  </div>
+                )}
+                
+                {/* TOP */}
+                <h3 className="text-[20px] font-[800] text-[#0F172A] tracking-tight mb-4">{plan.name}</h3>
+                
+                {/* PRICE BLOCK */}
+                <div className="mb-6">
+                  <div className="flex items-baseline gap-1">
+                    <span className={`text-[36px] font-[900] tracking-tighter ${isPremium ? 'text-[#7C3AED]' : 'text-[#2563EB]'}`}>
+                      ₹{plan.weeklyPremium}
+                    </span>
+                    <span className="text-[14px] text-[#64748B] font-medium">/week</span>
+                  </div>
+                  <p className="text-[13px] text-[#94A3B8] font-medium mt-1">~₹{plan.weeklyPremium * 4} per month</p>
                 </div>
 
-                {/* Plan Summary Card */}
-                <div className="bg-card rounded-[2rem] p-6 shadow-xl border border-white/5 relative overflow-hidden">
-                  <div className="absolute -top-10 -right-10 w-32 h-32 bg-primary/20 rounded-full blur-2xl pointer-events-none" />
-                  
-                  <div className="flex justify-between items-center mb-6 relative z-10">
-                    <div className="flex items-center gap-3">
-                      <div className="bg-primary/20 p-2.5 rounded-xl text-primary">
-                        <Shield className="w-6 h-6" />
-                      </div>
-                      <div>
-                        <h2 className="font-bold text-lg text-foreground">{plan.name}</h2>
-                        <p className="text-sm text-primary font-semibold">Billed Weekly</p>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="space-y-4 relative z-10 bg-background/50 p-4 rounded-xl text-sm border border-white/5">
-                    <div className="flex justify-between">
-                      <span className="text-muted-foreground font-medium">Weekly Premium</span>
-                      <span className="font-bold text-foreground">₹{plan.price}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-muted-foreground font-medium">Income Covered</span>
-                      <span className="font-bold text-foreground">Up to {plan.coverage}</span>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Payment Method Details */}
-                <div className="bg-card rounded-[1.5rem] p-6 shadow-xl border border-white/5">
-                  <h3 className="font-bold text-foreground mb-4 flex items-center gap-2">
-                    Payment Method
-                    <span className="bg-success/10 text-success text-[10px] uppercase font-bold px-2 py-0.5 rounded-md">UPI Default</span>
-                  </h3>
-                  
-                  <div className="space-y-4">
-                    <div>
-                      <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-2 block">Enter Your UPI ID</label>
-                      <input 
-                        value={upiId} 
-                        onChange={(e) => setUpiId(e.target.value)} 
-                        className="w-full bg-background border border-white/10 rounded-xl px-4 py-3 text-sm text-foreground focus:outline-none focus:border-primary transition-colors" 
-                        placeholder="arjun98@okaxis" 
-                      />
-                    </div>
-
-                    <label className="flex items-center gap-3 cursor-pointer group bg-background/50 p-4 rounded-xl border border-white/5 transition-colors hover:border-white/10">
-                      <div className={`w-5 h-5 rounded flex items-center justify-center transition-colors ${autoRenew ? 'bg-primary text-primary-foreground' : 'bg-muted border border-white/10'}`}>
-                        {autoRenew && <CheckCircle2 className="w-3.5 h-3.5" />}
-                      </div>
-                      <input type="checkbox" checked={autoRenew} onChange={() => setAutoRenew(!autoRenew)} className="hidden" />
-                      <div>
-                        <p className="text-sm font-bold text-foreground">Auto-renew weekly</p>
-                        <p className="text-xs text-muted-foreground">Cancel anytime before next billing</p>
-                      </div>
-                    </label>
-                  </div>
-                </div>
-
-                <div className="pt-4">
-                  <button 
-                    onClick={handlePayment}
-                    disabled={!upiId}
-                    className="w-full bg-primary text-primary-foreground py-4 rounded-full font-bold text-lg hover:shadow-xl hover:shadow-primary/30 hover:-translate-y-1 transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:hover:-translate-y-0 disabled:hover:shadow-none"
-                  >
-                    Pay ₹{plan.price} & Activate
-                  </button>
-                  <p className="text-center text-xs text-muted-foreground mt-4 flex items-center justify-center gap-1">
-                    <Shield className="w-3.5 h-3.5" /> 256-bit bank-level security
+                {/* COVERAGE LINE */}
+                <div className="bg-[#F8FAFC] rounded-xl p-4 mb-6 border border-[#E2E8F0]">
+                  <p className="text-[14px] font-[700] text-[#0F172A] mb-1">{plan.coveragePercent}% of your weekly income</p>
+                  <p className="text-[12px] text-[#64748B] font-medium flex justify-between">
+                    <span>Max payout:</span>
+                    <span className="font-bold text-[#0F172A]">₹{plan.maxPayout || plan.weeklyPremium * 120}</span>
                   </p>
                 </div>
-              </motion.div>
-            )}
 
-            {/* Processing State */}
-            {status === "processing" && (
-              <motion.div 
-                key="processing"
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.95 }}
-                className="flex flex-col items-center justify-center py-20 text-center"
-              >
-                <div className="w-20 h-20 mb-6 bg-primary/10 rounded-full flex items-center justify-center relative">
-                  <Loader2 className="w-10 h-10 text-primary animate-spin" />
-                  <div className="absolute inset-0 border-4 border-primary/20 rounded-full animate-ping" />
+                <div className="h-px w-full bg-[#E2E8F0] mb-6"></div>
+
+                {/* TRIGGERS LIST */}
+                <div className="flex-1 mb-8 space-y-3.5">
+                  {["Heavy rain", "Extreme heat", "Severe AQI", "App downtime", "Curfew/strike", "Order volume collapse"].map((trigger, idx) => {
+                    const isCovered = plan.triggers?.includes(trigger);
+                    return (
+                      <div key={idx} className="flex items-center gap-3">
+                        {isCovered ? (
+                          <div className={`w-5 h-5 rounded-full flex items-center justify-center ${isPremium ? 'bg-[#EDE9FE] text-[#7C3AED]' : 'bg-[#D1FAE5] text-[#059669]'}`}>
+                            <Check className="w-3.5 h-3.5" strokeWidth={3} />
+                          </div>
+                        ) : (
+                          <div className="w-5 h-5 flex items-center justify-center opacity-50">
+                            <X className="w-4 h-4 text-[#94A3B8]" />
+                          </div>
+                        )}
+                        <span className={`text-[14px] font-[500] ${isCovered ? 'text-[#0F172A]' : 'text-[#94A3B8] line-through decoration-[#94A3B8]/30'}`}>
+                          {trigger}
+                        </span>
+                      </div>
+                    );
+                  })}
                 </div>
-                <h2 className="font-display text-2xl font-bold text-foreground mb-2">Processing Payment</h2>
-                <p className="text-muted-foreground">Securely connecting to UPI network...</p>
-              </motion.div>
-            )}
 
-            {/* Success State */}
-            {status === "success" && (
-              <motion.div 
-                key="success"
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                className="flex flex-col items-center justify-center py-20 text-center"
-              >
-                <motion.div 
-                  initial={{ scale: 0 }}
-                  animate={{ scale: 1 }}
-                  transition={{ type: "spring", stiffness: 200, damping: 15 }}
-                  className="w-24 h-24 mb-6 bg-success/20 rounded-full flex items-center justify-center text-success"
+                {/* BOTTOM */}
+                <button 
+                  onClick={() => setSelectedPlanId(plan.id)}
+                  className={btnClasses}
                 >
-                  <CheckCircle2 className="w-12 h-12 text-success" />
-                </motion.div>
-                <h2 className="font-display text-3xl font-bold text-foreground mb-2">Payment Successful ✅</h2>
-                <p className="text-muted-foreground max-w-[280px]">Your initial premium of ₹{plan.price} has been paid successfully.</p>
-                <p className="text-primary font-bold mt-6 tracking-wider uppercase text-sm">Redirecting to Dashboard...</p>
-              </motion.div>
-            )}
-          </AnimatePresence>
+                  {selectedPlanId === plan.id ? "Selected" : "Select plan"}
+                </button>
+              </div>
+            );
+          })}
         </div>
-      </div>
-    </PageTransition>
-  );
-};
 
-export default Subscription;
+        {/* PREMIUM CALCULATOR */}
+        {selectedPlan && riskProfile && (
+          <div className="card-base p-8 bg-white max-w-4xl mx-auto border border-[#E2E8F0] shadow-md animate-in fade-in slide-in-from-bottom-4">
+            <h2 className="text-[18px] font-[800] text-[#0F172A] mb-6">Your exact premium breakdown</h2>
+            
+            <div className="flex items-center justify-center gap-4 flex-wrap mb-8">
+              {/* Fake base assumption */}
+              <div className="flex flex-col items-center">
+                <div className="bg-[#F8FAFC] border border-[#E2E8F0] text-[#0F172A] font-[700] text-[16px] px-6 py-3 rounded-2xl shadow-sm">
+                  Base ₹35
+                </div>
+                <span className="text-[12px] text-[#64748B] font-medium mt-2 uppercase tracking-wide">Starting</span>
+              </div>
+              
+              <span className="text-[#94A3B8] font-bold">×</span>
+
+              {riskProfile.factors?.map((f: any, idx: number) => (
+                <React.Fragment key={idx}>
+                  <div className="flex flex-col items-center">
+                    <div className="bg-[#F8FAFC] border border-[#E2E8F0] text-[#0F172A] font-[700] text-[16px] px-6 py-3 rounded-2xl shadow-sm">
+                      {f.label.split(" ")[0]} {f.multiplier}
+                    </div>
+                    <span className="text-[12px] text-[#64748B] font-medium mt-2 uppercase tracking-wide">Factor</span>
+                  </div>
+                  {idx < riskProfile.factors.length - 1 && <span className="text-[#94A3B8] font-bold">×</span>}
+                </React.Fragment>
+              ))}
+
+              <span className="text-[#2563EB] font-bold w-10 flex justify-center"><ArrowRight className="w-5 h-5" /></span>
+
+              <div className="flex flex-col items-center">
+                <div className="bg-[#DBEAFE] border border-[#BFDBFE] text-[#1D4ED8] font-[900] text-[20px] px-8 py-3 rounded-2xl shadow-[0_4px_12px_rgba(37,99,235,0.15)]">
+                  ₹{selectedPlan.weeklyPremium}/week
+                </div>
+                <span className="text-[12px] text-[#2563EB] font-[700] mt-2 uppercase tracking-wide">Final Cost</span>
+              </div>
+            </div>
+
+            <div className="flex justify-center gap-8 mb-8 pb-8 border-b border-[#E2E8F0]">
+              <div className="text-center">
+                <p className="text-[12px] text-[#64748B] font-[600] uppercase tracking-wide">Annual cost</p>
+                <p className="text-[16px] text-[#0F172A] font-[800]">₹{selectedPlan.weeklyPremium * 52}</p>
+              </div>
+              <div className="w-px bg-[#E2E8F0]"></div>
+              <div className="text-center">
+                <p className="text-[12px] text-[#64748B] font-[600] uppercase tracking-wide">Annual max coverage</p>
+                <p className="text-[16px] text-[#059669] font-[800]">₹{(selectedPlan.maxPayout || selectedPlan.weeklyPremium * 120) * 52}</p>
+              </div>
+            </div>
+
+            <button 
+              onClick={handleActivate}
+              disabled={activatingInfo !== null}
+              className={`w-full max-w-md mx-auto flex items-center justify-center gap-2 py-4 rounded-xl font-[700] text-[16px] transition-all shadow-[0_10px_20px_rgba(37,99,235,0.2)] ${
+                activatingInfo ? "opacity-75 cursor-not-allowed bg-[#94A3B8] text-white" : "bg-[#2563EB] text-white hover:bg-[#1D4ED8] hover:-translate-y-0.5"
+              }`}
+            >
+              {activatingInfo ? "Activating Shield..." : `Activate ${selectedPlan.name} coverage — ₹${selectedPlan.weeklyPremium}/week`}
+            </button>
+          </div>
+        )}
+      </main>
+    </div>
+  );
+}
