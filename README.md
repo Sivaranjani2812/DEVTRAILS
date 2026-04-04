@@ -9,7 +9,7 @@
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-Supabase-4169E1?logo=postgresql)
 
 📁 **GitHub:** https://github.com/Sivaranjani2812/DEVTRAILS.git
-🎥 **Demo Video:** [https://drive.google.com/drive/folders/1lEDu6X_4MenJtY6XLY5md9m8G0bDstFd](https://drive.google.com/file/d/1Sqhzju9Q-xfezIAwXmsIdnvbMWG75Noi/view?usp=drivesdk)
+🎥 **Demo Video:** https://drive.google.com/file/d/1Sqhzju9Q-xfezIAwXmsIdnvbMWG75Noi/view?usp=drivesdk
 
 ---
 
