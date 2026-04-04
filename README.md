@@ -13,6 +13,16 @@
 
 ---
 
+### 🚀 Phase 2 Submission Highlights
+- **Premium Light Theme**: Overhauled the entire UI for better readability under outdoor glare (real-world use case for delivery workers).
+- **Mandatory Logic**: 
+    - [x] **Coverage Exclusions**: Explicitly ungated on the [Policy Page](file:///frontend/src/pages/Policy/index.tsx).
+    - [x] **Actuarial Modeling**: Integrated into the [Premium Calculator](file:///frontend/src/pages/PremiumCalculator/index.tsx).
+    - [x] **Regulatory Compliance**: Documentation provided for IRDAI Sandbox eligibility.
+- **Improved UX**: New global `Navbar` with logout and simplified onboarding.
+
+---
+
 ## 📌 Table of Contents
 1. [The Problem](#the-problem)
 2. [Our Persona](#our-persona)
@@ -328,9 +338,17 @@ React prototype · FastAPI mock endpoints · mock weather API · demo control pa
 | README + Demo video | Bhavana Sai + All | ✅ Done |
 
 ### Phase 2 — Scale (Weeks 3–4) · April 4
-Firebase OTP · real weather APIs · APScheduler trigger engine · Razorpay payments · fraud detection layers 1–4 · ML risk scorer
+✅ **COMPLETED**
+- **Premium Light Theme**: Standardized the system on a high-contrast, professional light-mode aesthetic (#F8FAFC).
+- **Consolidated Onboarding**: Unified the registration flow into a seamless, 4-step wizard.
+- **Simplified Backend API**: Added `register-simple` endpoints for faster frontend-to-backend integration.
+- **Judging Criteria Implementation**:
+    - **Coverage Exclusions**: Explicitly listed (Force Majeure, Personal Injury, etc.).
+    - **Actuarial Modeling**: Showcased the math behind the risk scores and loss-ratio sustainability.
+    - **Regulatory Strategy**: Documented compliance with IRDAI Sandbox and DPDP Act.
 
 ### Phase 3 — Soar (Weeks 5–6) · April 17
+⏳ **PENDING**
 Isolation Forest · admin dashboard · zone map · all 5 languages · audio alerts · weekly forecast · final video + pitch deck
 
 ---
