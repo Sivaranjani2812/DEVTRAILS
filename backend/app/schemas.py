@@ -26,6 +26,17 @@ class WorkerBase(BaseModel):
 class WorkerCreate(WorkerBase):
     pass
 
+class WorkerRegisterSimple(BaseModel):
+    name: str
+    phone: str
+    city: str
+    zone: str
+    platform: str
+    weekly_income: float
+    selected_plan: str
+    upi_id: str
+    device_fingerprint: str
+
 class WorkerResponse(WorkerBase):
     id: int
     risk_score: Optional[int] = None

@@ -1,304 +1,288 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
-import { toast } from 'react-hot-toast';
-import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
-import 'leaflet/dist/leaflet.css';
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { Check, Camera, ShieldAlert, ArrowRight, ArrowLeft, Shield } from "lucide-react";
+import toast from "react-hot-toast";
+import { RadialBarChart, RadialBar, PolarAngleAxis, ResponsiveContainer } from "recharts";
+import axios from "axios";
 
-// Fix for default marker icon in react-leaflet
-import L from 'leaflet';
-import icon from 'leaflet/dist/images/marker-icon.png';
-import iconShadow from 'leaflet/dist/images/marker-shadow.png';
-let DefaultIcon = L.icon({
-    iconUrl: icon,
-    shadowUrl: iconShadow,
-    iconAnchor: [12, 41]
-});
-L.Marker.prototype.options.icon = DefaultIcon;
-
-const DARK_STORES = [
-  { id: 'HSR Layout', name: 'HSR Layout', lat: 12.9141, lng: 77.6411 },
-  { id: 'Koramangala', name: 'Koramangala', lat: 12.9279, lng: 77.6271 },
-  { id: 'BTM Layout', name: 'BTM Layout', lat: 12.9165, lng: 77.6101 },
-  { id: 'Whitefield', name: 'Whitefield', lat: 12.9698, lng: 77.7499 },
-];
+const API = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
+const steps = ["Personal", "Work", "Risk", "KYC"];
 
 export default function Onboarding() {
-  const [step, setStep] = useState(1);
   const navigate = useNavigate();
+  
+  const [currentStep, setCurrentStep] = useState(1);
   const [loading, setLoading] = useState(false);
-
+  const [riskData, setRiskData] = useState<any>(null);
+  
+  // Form State
   const [formData, setFormData] = useState({
-    name: '',
-    city: 'Bangalore',
-    language: 'English',
-    platforms: [] as string[],
-    dark_store_zones: [] as string[],
-    days_per_week: 5,
-    shift_timing: 'Morning',
-    weekly_income: 4000,
-    weekly_budget: 100,
-    savings_level: 'Medium',
-    disruption_frequency: 'Sometimes',
-    past_disruption_types: [] as string[],
-    upi_id: ''
+    name: "",
+    phone: "", 
+    city: "Bengaluru",
+    zone: "",
+    platform: "Zepto",
+    hoursPerDay: 8,
+    dailyEarnings: 1000,
+    upi_id: "",
+    platformId: "",
+    selectedPlan: "Standard"
   });
 
-  const updateForm = (key: string, value: any) => {
-    setFormData(prev => ({ ...prev, [key]: value }));
-  };
+  useEffect(() => {
+    const storedUser = localStorage.getItem("insure_gig_user");
+    if (storedUser) {
+        setFormData(prev => ({ ...prev, phone: JSON.parse(storedUser).phone }));
+    }
+  }, []);
 
-  const handleCheckbox = (key: 'platforms' | 'past_disruption_types', value: string) => {
-    setFormData(prev => {
-      const current = prev[key];
-      return {
-        ...prev,
-        [key]: current.includes(value) ? current.filter(item => item !== value) : [...current, value]
-      };
-    });
-  };
+  const handleNext = () => setCurrentStep((p) => Math.min(p + 1, 4));
+  const handleBack = () => setCurrentStep((p) => Math.max(p - 1, 1));
 
+  useEffect(() => {
+    if (currentStep === 3 && !riskData) {
+      setLoading(true);
+      setTimeout(async () => {
+        try {
+          const res = await axios.post(`${API}/workers/risk-profile`, {
+            city: formData.city,
+            zone: formData.zone,
+            hoursPerDay: formData.hoursPerDay,
+            dailyEarnings: formData.dailyEarnings,
+            platform: formData.platform
+          });
+          setRiskData(res.data);
+          setFormData(prev => ({ ...prev, selectedPlan: res.data.recommendedPlan }));
+        } catch (err) {
+          console.warn("API failed, using fallback risk data");
+          setRiskData({
+            score: 78,
+            level: "Moderate",
+            factors: [
+              { label: `${formData.city} Zone`, multiplier: "1.2x", icon: "map" },
+              { label: `${formData.hoursPerDay} hrs/day`, multiplier: "1.1x", icon: "clock" },
+              { label: formData.platform, multiplier: "1.0x", icon: "star" }
+            ],
+            recommendedPlan: "Standard"
+          });
+        } finally {
+          setLoading(false);
+        }
+      }, 1000);
+    }
+  }, [currentStep, riskData, formData]);
 
-  const submitForm = async () => {
-    setLoading(true);
+  const handleSubmit = async () => {
     try {
-      // Use phone stored during OTP verification, fallback to unique mock
-      const storedUser = localStorage.getItem("insure_gig_user");
-      const storedPhone = storedUser ? JSON.parse(storedUser).phone : null;
-      const phone = storedPhone || `+91${Date.now().toString().slice(-10)}`;
-
+      setLoading(true);
       const payload = {
-        ...formData,
-        phone,
-        platforms_count: Math.max(1, formData.platforms.length),
+        name: formData.name,
+        phone: formData.phone,
+        city: formData.city,
+        zone: formData.zone || "HSR Layout",
+        platform: formData.platform,
+        weekly_income: formData.dailyEarnings * 6,
+        selected_plan: formData.selectedPlan,
+        upi_id: formData.upi_id || "worker@upi",
         device_fingerprint: navigator.userAgent
       };
 
-      const res = await axios.post(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000'}/workers/register`, payload);
-      localStorage.setItem("userId", res.data.worker.id);
-      toast.success("Profile created!");
+      const res = await axios.post(`${API}/workers/register-simple`, payload);
       
-      // Navigate to plan recommendation
-      navigate('/premium'); 
-    } catch (err: any) {
-      console.error("Registration error:", err?.response?.data || err);
-      const detail = err?.response?.data?.detail;
-      if (typeof detail === 'string' && detail.includes("UNIQUE")) {
-        toast.error("Phone already registered. Try logging in instead.");
-      } else {
-        toast.error(`Registration failed: ${JSON.stringify(detail) || "Please try again."}`);
+      // Update local storage to mark as onboarded
+      const savedUser = localStorage.getItem("insure_gig_user");
+      if (savedUser) {
+          const userObj = JSON.parse(savedUser);
+          userObj.onboarded = true;
+          userObj.id = res.data.worker_id;
+          localStorage.setItem("insure_gig_user", JSON.stringify(userObj));
+          localStorage.setItem("userId", res.data.worker_id);
       }
+      
+      toast.success("Registration complete! Policy activated.");
+      navigate("/dashboard");
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to register. Please try again.");
     } finally {
       setLoading(false);
     }
   };
 
+  const renderStepIcon = (num: number) => {
+    if (currentStep > num) return <Check className="w-4 h-4 text-white" />;
+    return <span className={`text-[12px] font-bold ${currentStep === num ? "text-white" : "text-[#94A3B8]"}`}>{num}</span>;
+  };
+
+  const platforms = ["Zepto", "Blinkit", "Both"];
+  const cities = ["Bengaluru", "Mumbai", "Delhi", "Chennai", "Hyderabad"];
 
   return (
-    <div className="min-h-screen bg-slate-950 p-4 pb-20 text-slate-200">
-      <div className="max-w-xl mx-auto mt-10 bg-slate-900 border border-slate-800 rounded-xl shadow-xl overflow-hidden">
-        
-        {/* Progress Bar */}
-        <div className="h-2 bg-slate-800 w-full">
-          <div className="h-full bg-emerald-500 transition-all duration-500" style={{ width: `${(step / 5) * 100}%` }}></div>
+    <div className="min-h-screen bg-[#F8FAFC] flex flex-col pt-8 font-sans">
+      <div className="w-full max-w-[560px] mx-auto px-4 pb-12">
+        <div className="flex items-center justify-between mb-8 relative">
+          <div className="absolute left-0 top-1/2 -translate-y-1/2 w-full h-[2px] bg-[#E2E8F0] -z-10 rounded"></div>
+          {steps.map((label, i) => {
+            const num = i + 1;
+            const isActive = currentStep === num;
+            const isDone = currentStep > num;
+            return (
+              <div key={label} className="flex flex-col items-center gap-2">
+                <div className={`w-8 h-8 rounded-full flex items-center justify-center transition-colors ${isActive || isDone ? "bg-[#2563EB]" : "bg-white border-2 border-[#E2E8F0]"}`}>
+                  {renderStepIcon(num)}
+                </div>
+                <span className={`text-[10px] font-black uppercase tracking-widest ${isActive ? "text-[#0F172A]" : "text-[#94A3B8]"}`}>{label}</span>
+              </div>
+            );
+          })}
         </div>
 
-        <div className="p-8">
-          <p className="text-emerald-500 font-semibold mb-2">Step {step} of 5</p>
-          
-          {step === 1 && (
-            <div className="space-y-6 animate-in fade-in slide-in-from-right-4">
-              <h2 className="text-2xl font-bold text-white">Identity Details</h2>
-              <div>
-                <label className="block text-sm mb-2">Full Name</label>
-                <input type="text" value={formData.name} onChange={(e) => updateForm('name', e.target.value)} className="w-full p-3 rounded-lg bg-slate-800 border border-slate-700 focus:ring-2 focus:ring-emerald-500" placeholder="Ravi Kumar" />
-              </div>
-              <div>
-                <label className="block text-sm mb-2">City</label>
-                <select value={formData.city} onChange={(e) => updateForm('city', e.target.value)} className="w-full p-3 rounded-lg bg-slate-800 border border-slate-700">
-                  <option value="Bangalore">Bangalore</option>
-                  <option value="Mumbai">Mumbai</option>
-                  <option value="Delhi">Delhi</option>
-                </select>
-              </div>
-              <div>
-                <label className="block text-sm mb-2">Language</label>
-                <select value={formData.language} onChange={(e) => updateForm('language', e.target.value)} className="w-full p-3 rounded-lg bg-slate-800 border border-slate-700">
-                  <option value="English">English</option>
-                  <option value="Hindi">Hindi</option>
-                  <option value="Kannada">Kannada</option>
-                </select>
+        <div className="bg-white border border-[#E2E8F0] rounded-3xl p-6 md:p-8 shadow-sm overflow-hidden">
+          {currentStep === 1 && (
+            <div className="animate-in slide-in-from-right-4 fade-in duration-300">
+              <h2 className="text-2xl font-black text-[#0F172A] mb-2">Basic Details</h2>
+              <p className="text-sm text-[#64748B] mb-8">Let's get your profile started.</p>
+
+              <div className="space-y-5">
+                <div>
+                  <label className="block text-[11px] font-black text-[#94A3B8] uppercase tracking-widest mb-2">Full Name</label>
+                  <input type="text" className="w-full h-12 bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl px-4 text-[#0F172A] font-semibold outline-none focus:border-[#2563EB] transition-colors" placeholder="Enter your full name" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} />
+                </div>
+                <div>
+                   <label className="block text-[11px] font-black text-[#94A3B8] uppercase tracking-widest mb-2">City</label>
+                  <div className="grid grid-cols-2 gap-3">
+                    {cities.map(c => (
+                      <button key={c} onClick={() => setFormData({...formData, city: c})} className={`h-12 rounded-xl border flex items-center justify-center font-bold text-sm transition-all ${formData.city === c ? "border-[#2563EB] bg-[#DBEAFE]/40 text-[#2563EB]" : "border-[#E2E8F0] text-[#64748B] hover:border-[#94A3B8]"}`}>{c}</button>
+                    ))}
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-[11px] font-black text-[#94A3B8] uppercase tracking-widest mb-2">Delivery Platform</label>
+                  <div className="flex gap-3">
+                    {platforms.map(p => (
+                      <button key={p} onClick={() => setFormData({...formData, platform: p})} className={`flex-1 h-12 rounded-xl border flex items-center justify-center font-bold text-sm transition-all ${formData.platform === p ? "border-[#2563EB] bg-[#DBEAFE]/40 text-[#2563EB]" : "border-[#E2E8F0] text-[#64748B] hover:border-[#94A3B8]"}`}>{p}</button>
+                    ))}
+                  </div>
+                </div>
               </div>
             </div>
           )}
 
-          {step === 2 && (
-            <div className="space-y-6 animate-in fade-in slide-in-from-right-4">
-              <h2 className="text-2xl font-bold text-white">Platforms</h2>
-              <p className="text-sm text-slate-400">Which Q-commerce companies do you deliver for?</p>
-              <div className="space-y-3">
-                {['Zepto', 'Blinkit', 'Swiggy Instamart'].map(p => (
-                  <label key={p} className="flex items-center space-x-3 p-3 rounded-lg border border-slate-700 bg-slate-800 cursor-pointer hover:bg-slate-700 transition-colors">
-                    <input type="checkbox" checked={formData.platforms.includes(p)} onChange={() => handleCheckbox('platforms', p)} className="w-5 h-5 accent-emerald-500" />
-                    <span className="font-medium">{p}</span>
-                  </label>
-                ))}
+          {currentStep === 2 && (
+            <div className="animate-in slide-in-from-right-4 fade-in duration-300">
+              <h2 className="text-2xl font-black text-[#0F172A] mb-2">Work Habits</h2>
+              <p className="text-sm text-[#64748B] mb-8">This helps calculate your disruption risk.</p>
+
+              <div className="space-y-8">
+                <div>
+                  <div className="flex justify-between items-center mb-4">
+                    <label className="text-[11px] font-black text-[#94A3B8] uppercase tracking-widest">Working Hours / Day</label>
+                    <span className="text-sm font-black text-[#2563EB]">{formData.hoursPerDay} hrs</span>
+                  </div>
+                  <input type="range" min={4} max={14} step={1} value={formData.hoursPerDay} onChange={e => setFormData({...formData, hoursPerDay: parseInt(e.target.value)})} className="w-full accent-[#2563EB]" />
+                </div>
+
+                <div>
+                   <label className="block text-[11px] font-black text-[#94A3B8] uppercase tracking-widest mb-2">Delivery Zone (Optional)</label>
+                   <input type="text" className="w-full h-12 bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl px-4 text-[#0F172A] font-semibold outline-none focus:border-[#2563EB] transition-colors" placeholder="e.g. HSR Layout, Indiranagar" value={formData.zone} onChange={e => setFormData({...formData, zone: e.target.value})} />
+                </div>
+
+                <div>
+                   <label className="block text-[11px] font-black text-[#94A3B8] uppercase tracking-widest mb-2">Average Daily Income</label>
+                   <div className="bg-[#F8FAFC] p-4 rounded-xl border border-[#E2E8F0] text-center">
+                        <span className="text-3xl font-black text-[#059669]">₹{formData.dailyEarnings}</span>
+                        <input type="range" min={300} max={2500} step={50} value={formData.dailyEarnings} onChange={e => setFormData({...formData, dailyEarnings: parseInt(e.target.value)})} className="w-full accent-[#059669] mt-4" />
+                   </div>
+                </div>
               </div>
             </div>
           )}
 
-          {step === 3 && (
-            <div className="space-y-6 animate-in fade-in slide-in-from-right-4">
-              <h2 className="text-2xl font-bold text-white">Dark Store Zones</h2>
-              <p className="text-sm text-slate-400">Select up to 3 dark stores where you operate. This defines your coverage area.</p>
-              <div className="h-64 rounded-xl overflow-hidden border border-slate-700">
-                <MapContainer center={[12.9716, 77.5946]} zoom={11} style={{ height: '100%', width: '100%' }}>
-                  <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
-                  {DARK_STORES.map(store => (
-                    <Marker key={store.id} position={[store.lat, store.lng]}>
-                      <Popup>
-                        <div className="text-slate-900">
-                          <strong className="block mb-2">{store.name}</strong>
-                          <button 
-                            onClick={() => {
-                              if (formData.dark_store_zones.includes(store.id)) {
-                                updateForm('dark_store_zones', formData.dark_store_zones.filter(z => z !== store.id));
-                              } else {
-                                if (formData.dark_store_zones.length < 3) {
-                                  updateForm('dark_store_zones', [...formData.dark_store_zones, store.id]);
-                                } else {
-                                  toast.error("Max 3 zones allowed");
-                                }
-                              }
-                            }}
-                            className="bg-emerald-600 text-white px-3 py-1 rounded text-xs"
-                          >
-                            {formData.dark_store_zones.includes(store.id) ? 'Remove' : 'Select Zone'}
-                          </button>
+          {currentStep === 3 && (
+            <div className="animate-in slide-in-from-right-4 fade-in duration-300">
+              <h2 className="text-2xl font-black text-[#0F172A] mb-2">Risk Profile</h2>
+              <p className="text-sm text-[#64748B] mb-8">Generated by GigShield's actuarial model.</p>
+
+              {loading || !riskData ? (
+                <div className="flex flex-col items-center justify-center py-10 space-y-4">
+                   <div className="w-12 h-12 border-4 border-[#2563EB] border-t-transparent rounded-full animate-spin"></div>
+                   <p className="text-sm font-bold text-[#64748B]">Analyzing hyper-local weather data...</p>
+                </div>
+              ) : (
+                <div className="space-y-6">
+                    <div className="flex items-center gap-6 bg-[#F8FAFC] p-6 rounded-2xl border border-[#E2E8F0]">
+                        <div className="w-24 h-24 relative flex-shrink-0">
+                            <ResponsiveContainer width="100%" height="100%">
+                                <RadialBarChart cx="50%" cy="50%" innerRadius="70%" outerRadius="100%" data={[{ value: riskData.score, fill: "#2563EB" }]} startAngle={90} endAngle={-270}>
+                                    <PolarAngleAxis type="number" domain={[0, 100]} angleAxisId={0} tick={false} />
+                                    <RadialBar background clockWise dataKey="value" cornerRadius={10} />
+                                </RadialBarChart>
+                            </ResponsiveContainer>
+                            <div className="absolute inset-0 flex flex-col items-center justify-center">
+                                <span className="text-xl font-black text-[#0F172A]">{riskData.score}</span>
+                            </div>
                         </div>
-                      </Popup>
-                    </Marker>
-                  ))}
-                </MapContainer>
-              </div>
-              <div>
-                <p className="text-sm font-medium">Selected Zones:</p>
-                <div className="flex flex-wrap gap-2 mt-2">
-                  {formData.dark_store_zones.map(z => (
-                    <span key={z} className="bg-emerald-500/20 text-emerald-400 px-3 py-1 rounded-full text-sm border border-emerald-500/30">
-                      {z}
-                    </span>
-                  ))}
-                  {formData.dark_store_zones.length === 0 && <span className="text-slate-500 text-sm">None selected</span>}
+                        <div>
+                            <div className={`text-xs font-black uppercase tracking-widest ${riskData.level === 'High' ? 'text-red-500' : 'text-[#059669]'}`}>{riskData.level} Risk Profile</div>
+                            <h3 className="text-lg font-black text-[#0F172A]">Plan Suggestion: {riskData.recommendedPlan}</h3>
+                        </div>
+                    </div>
+                    
+                    <div className="grid grid-cols-1 gap-2">
+                         {riskData.factors.map((f: any, i: number) => (
+                             <div key={i} className="flex items-center justify-between p-3 bg-white border border-[#F1F5F9] rounded-xl text-sm font-bold">
+                                <span className="text-[#64748B]">{f.label}</span>
+                                <span className="text-[#2563EB]">{f.multiplier} impact</span>
+                             </div>
+                         ))}
+                    </div>
                 </div>
-              </div>
+              )}
             </div>
           )}
 
-          {step === 4 && (
-            <div className="space-y-6 animate-in fade-in slide-in-from-right-4">
-              <h2 className="text-2xl font-bold text-white">Work & Finance Profile</h2>
-              
-              <div>
-                <label className="block text-sm mb-2">Days worked per week: {formData.days_per_week}</label>
-                <input type="range" min="1" max="7" value={formData.days_per_week} onChange={(e) => updateForm('days_per_week', parseInt(e.target.value))} className="w-full accent-emerald-500" />
-              </div>
-              
-              <div>
-                <label className="block text-sm mb-2">Shift Timing</label>
-                <div className="grid grid-cols-3 gap-3">
-                  {['Morning', 'Evening', 'Night'].map(s => (
-                    <button key={s} onClick={() => updateForm('shift_timing', s)} className={`py-2 rounded-lg border ${formData.shift_timing === s ? 'bg-emerald-600 border-emerald-500' : 'bg-slate-800 border-slate-700'}`}>
-                      {s}
+          {currentStep === 4 && (
+            <div className="animate-in slide-in-from-right-4 fade-in duration-300">
+               <h2 className="text-2xl font-black text-[#0F172A] mb-2">Final Step</h2>
+               <p className="text-sm text-[#64748B] mb-8">Setup your instant payout account.</p>
+
+               <div className="space-y-6">
+                 <div>
+                    <label className="block text-[11px] font-black text-[#94A3B8] uppercase tracking-widest mb-2">UPI ID (For Instant Payouts)</label>
+                    <input type="text" className="w-full h-12 bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl px-4 text-[#0F172A] font-black outline-none focus:border-[#2563EB] transition-colors" placeholder="number@upi" value={formData.upi_id} onChange={e => setFormData({...formData, upi_id: e.target.value})} />
+                 </div>
+                 
+                 <div>
+                    <label className="block text-[11px] font-black text-[#94A3B8] uppercase tracking-widest mb-2">Worker Platform ID</label>
+                    <input type="text" className="w-full h-12 bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl px-4 text-[#0F172A] font-black outline-none focus:border-[#2563EB] transition-colors" placeholder="e.g. ZEP-45892" value={formData.platformId} onChange={e => setFormData({...formData, platformId: e.target.value})} />
+                 </div>
+
+                 <div className="bg-blue-50 border border-blue-100 p-4 rounded-2xl flex gap-3">
+                    <Shield className="text-[#2563EB] flex-shrink-0" size={20} />
+                    <p className="text-[11px] text-[#2563EB] font-bold leading-relaxed">By clicking complete, you agree to the parametric payout terms. No manual claims needed — we monitor the weather & platform status for you.</p>
+                 </div>
+               </div>
+            </div>
+          )}
+
+          <div className="flex items-center justify-between mt-10">
+            {currentStep > 1 && (
+              <button disabled={loading} onClick={handleBack} className="h-12 px-6 font-bold text-[#64748B] hover:text-[#0F172A] transition-colors flex items-center gap-2">
+                <ArrowLeft size={16} /> Back
+              </button>
+            )}
+            <div className="ml-auto">
+                {currentStep < 4 ? (
+                    <button disabled={loading || !formData.name} onClick={handleNext} className="bg-[#2563EB] hover:bg-[#1D4ED8] text-white font-bold h-12 px-8 rounded-xl transition-all shadow-lg shadow-blue-500/20 flex items-center gap-2">
+                        Forward <ArrowRight size={16} />
                     </button>
-                  ))}
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm mb-2">Weekly Income (₹)</label>
-                  <input type="number" value={formData.weekly_income} onChange={(e) => updateForm('weekly_income', parseFloat(e.target.value))} className="w-full p-2 rounded-lg bg-slate-800 border border-slate-700" />
-                </div>
-                <div>
-                  <label className="block text-sm mb-2">Budget (₹)</label>
-                  <input type="number" value={formData.weekly_budget} onChange={(e) => updateForm('weekly_budget', parseFloat(e.target.value))} className="w-full p-2 rounded-lg bg-slate-800 border border-slate-700" />
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-sm mb-2">Disruption Frequency</label>
-                <select value={formData.disruption_frequency} onChange={(e) => updateForm('disruption_frequency', e.target.value)} className="w-full p-3 rounded-lg bg-slate-800 border border-slate-700">
-                  <option value="Rarely">Rarely</option>
-                  <option value="Sometimes">Sometimes</option>
-                  <option value="Often">Often</option>
-                </select>
-              </div>
-              
-              <div>
-                <label className="block text-sm mb-2">Past Disruption Types</label>
-                 <div className="grid grid-cols-2 gap-2">
-                  {['Rain', 'Flood', 'Heat', 'Pollution', 'App Outage'].map(p => (
-                    <label key={p} className="flex items-center space-x-2 text-sm">
-                      <input type="checkbox" checked={formData.past_disruption_types.includes(p)} onChange={() => handleCheckbox('past_disruption_types', p)} className="accent-emerald-500" />
-                      <span>{p}</span>
-                    </label>
-                  ))}
-                </div>
-              </div>
-
+                ) : (
+                    <button disabled={loading} onClick={handleSubmit} className="bg-[#059669] hover:bg-[#047857] text-white font-black h-12 px-8 rounded-xl transition-all shadow-lg shadow-emerald-500/20">
+                        {loading ? "Activating..." : "Finish & Activate Policy"}
+                    </button>
+                )}
             </div>
-          )}
-
-          {step === 5 && (
-            <div className="space-y-6 animate-in fade-in slide-in-from-right-4">
-              <h2 className="text-2xl font-bold text-white">Payout details</h2>
-              <p className="text-sm text-slate-400">Where should we instantly send your claims?</p>
-              
-              <div>
-                <label className="block text-sm mb-2">UPI ID</label>
-                <input type="text" value={formData.upi_id} onChange={(e) => updateForm('upi_id', e.target.value)} className="w-full p-3 rounded-lg bg-slate-800 border border-slate-700 focus:ring-2 focus:ring-emerald-500" placeholder="number@upi" />
-              </div>
-
-              <div className="p-4 bg-emerald-500/10 border border-emerald-500/20 rounded-lg mt-6">
-                <h3 className="font-semibold text-emerald-400 mb-2">Summary</h3>
-                <ul className="text-sm space-y-1 text-slate-300">
-                  <li>Name: {formData.name}</li>
-                  <li>Platforms: {formData.platforms.join(', ')}</li>
-                  <li>Zones: {formData.dark_store_zones.join(', ')}</li>
-                  <li>Shift: {formData.shift_timing}</li>
-                </ul>
-              </div>
-            </div>
-          )}
-
-          {/* Nav Buttons */}
-          <div className="mt-8 flex justify-between">
-            <button 
-              onClick={() => setStep(prev => prev - 1)} 
-              disabled={step === 1}
-              className="px-6 py-2 rounded-lg font-medium text-slate-400 hover:text-white disabled:opacity-50"
-            >
-              Back
-            </button>
-            <button 
-              onClick={() => {
-                if (step === 5) {
-                  submitForm();
-                } else {
-                  if (step === 1 && !formData.name) return toast.error("Name required");
-                  if (step === 2 && formData.platforms.length === 0) return toast.error("Select at least 1 platform");
-                  if (step === 3 && formData.dark_store_zones.length === 0) return toast.error("Select at least 1 zone");
-                  setStep(prev => prev + 1);
-                }
-              }} 
-              disabled={loading}
-              className="px-8 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg font-medium transition-colors"
-            >
-              {step === 5 ? (loading ? 'Saving...' : 'Finish') : 'Next'}
-            </button>
           </div>
-
         </div>
       </div>
     </div>

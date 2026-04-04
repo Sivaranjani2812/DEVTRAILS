@@ -1,23 +1,28 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import { FileText, AlertCircle, RefreshCw, CheckCircle2 } from 'lucide-react';
+import { FileText, AlertCircle, RefreshCw, CheckCircle2, Zap, PlayCircle } from 'lucide-react';
 import { toast } from 'react-hot-toast';
+
+const API = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
+
+const DEMO_TRIGGERS = ['Rain', 'Flood', 'Heat', 'App Outage', 'Zone Shutdown'];
+const DEMO_ZONES = ['HSR Layout', 'Koramangala', 'BTM Layout', 'Whitefield'];
 
 export default function Claims() {
   const [claims, setClaims] = useState<any[]>([]);
   const workerId = Number(localStorage.getItem('userId')) || 1;
   const [loading, setLoading] = useState(true);
+  const [triggering, setTriggering] = useState(false);
 
   useEffect(() => {
     fetchClaims();
-    // Auto refresh claims occasionally to simulate live updates
     const interval = setInterval(fetchClaims, 5000);
     return () => clearInterval(interval);
   }, []);
 
   const fetchClaims = async () => {
     try {
-      const res = await axios.get(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000'}/claims/${workerId}`);
+      const res = await axios.get(`${API}/claims/${workerId}`);
       setClaims(res.data);
     } catch (e) {
       console.error(e);
@@ -28,14 +33,45 @@ export default function Claims() {
 
   const handleAppeal = async (claimId: string) => {
     try {
-      await axios.post(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000'}/claims/${claimId}/appeal`, {
+      await axios.post(`${API}/claims/${claimId}/appeal`, {
         reason: 'Automated ML flag incorrect. I was affected by this.',
         additional_info: ''
       });
-      toast.success("Appeal submitted for admin review");
+      toast.success('Appeal submitted for admin review');
       fetchClaims();
     } catch (e) {
-      toast.error("Issue filing appeal");
+      toast.error('Issue filing appeal');
+    }
+  };
+
+  const handleDemoTrigger = async () => {
+    setTriggering(true);
+    const trigger = DEMO_TRIGGERS[Math.floor(Math.random() * DEMO_TRIGGERS.length)];
+    const zone = DEMO_ZONES[Math.floor(Math.random() * DEMO_ZONES.length)];
+    try {
+      await axios.post(`${API}/mock/trigger-claim`, {
+        worker_id: workerId,
+        trigger_type: trigger,
+        zone: zone,
+        payout_amount: Math.floor(Math.random() * 500) + 200
+      });
+      toast.success(`🌧 ${trigger} trigger fired in ${zone}! Claim pipeline started.`);
+      setTimeout(fetchClaims, 1000);
+    } catch (err: any) {
+      // Fallback: create a local mock display
+      const mockClaim = {
+        id: `demo-${Date.now()}`,
+        trigger_type: trigger,
+        zone,
+        payout_amount: Math.floor(Math.random() * 500) + 200,
+        status: 'fraud_check_pending',
+        created_at: new Date().toISOString(),
+        fraud_flags: []
+      };
+      setClaims(prev => [mockClaim, ...prev]);
+      toast.success(`🌧 Demo: ${trigger} triggered in ${zone}!`);
+    } finally {
+      setTriggering(false);
     }
   };
 
@@ -44,14 +80,38 @@ export default function Claims() {
   return (
     <div className="min-h-screen bg-slate-950 p-4 pb-24 text-slate-200">
       <div className="max-w-4xl mx-auto space-y-6">
-        <div className="flex items-center justify-between mb-8">
+        <div className="flex items-center justify-between">
           <div>
-             <h1 className="text-3xl font-bold text-white mb-2">Claims Center</h1>
-             <p className="text-slate-400">Track dynamic payouts and history</p>
+            <h1 className="text-3xl font-black text-white mb-1">Claims Center</h1>
+            <p className="text-slate-400 text-sm">Real-time payout pipeline — auto-triggered during active shifts</p>
           </div>
-          <button onClick={fetchClaims} className="p-2 hover:bg-slate-800 rounded-lg text-slate-400 transition-colors">
-            <RefreshCw size={20} className={loading && claims.length === 0 ? "animate-spin" : ""} />
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={handleDemoTrigger}
+              disabled={triggering}
+              className="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-4 py-2.5 rounded-xl text-sm transition-all disabled:opacity-60 shadow-lg shadow-emerald-600/20"
+            >
+              {triggering ? <RefreshCw size={16} className="animate-spin" /> : <PlayCircle size={16} />}
+              Demo Trigger
+            </button>
+            <button onClick={fetchClaims} className="p-2.5 hover:bg-slate-800 rounded-xl text-slate-400 transition-colors border border-slate-800">
+              <RefreshCw size={18} className={loading ? 'animate-spin' : ''} />
+            </button>
+          </div>
+        </div>
+
+        {/* Stats bar */}
+        <div className="grid grid-cols-3 gap-4">
+          {[
+            { label: 'Total Claims', value: claims.length, color: 'text-white' },
+            { label: 'Paid Out', value: claims.filter(c => c.status === 'paid').length, color: 'text-emerald-400' },
+            { label: 'Total ₹', value: `₹${claims.filter(c => c.status === 'paid').reduce((s, c) => s + c.payout_amount, 0)}`, color: 'text-blue-400' },
+          ].map(s => (
+            <div key={s.label} className="bg-slate-900 border border-slate-800 rounded-xl p-4 text-center">
+              <div className={`text-2xl font-black ${s.color}`}>{s.value}</div>
+              <div className="text-xs text-slate-500 mt-1">{s.label}</div>
+            </div>
+          ))}
         </div>
 
         {/* Live Active Claim Pipeline */}
@@ -163,9 +223,10 @@ export default function Claims() {
                ))}
              </div>
            ) : (
-             <div className="text-center py-10 bg-slate-800/30 rounded-xl border border-slate-700 border-dashed">
-               <FileText className="mx-auto h-8 w-8 text-slate-600 mb-2" />
-               <p className="text-slate-400">No claims filed yet.</p>
+             <div className="text-center py-12 bg-slate-800/20 rounded-xl border border-dashed border-slate-800">
+               <FileText className="mx-auto h-10 w-10 text-slate-700 mb-3" />
+               <p className="text-white font-semibold mb-1">No claims yet</p>
+               <p className="text-slate-500 text-sm mb-4">Click <strong className="text-emerald-400">Demo Trigger</strong> above to simulate a real payout pipeline and watch it process in real-time!</p>
              </div>
            )}
         </div>

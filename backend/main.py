@@ -4,7 +4,7 @@ import logging
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
 from app.init_db import init_db
-from app.routers import auth, workers, zones, plans, policies, shifts, premium, claims, admin, mock
+from app.routers import auth, workers, zones, plans, policies, shifts, premium, claims, admin, mock, triggers
 from app.services.trigger_engine import check_all_triggers
 from app.ml.risk_scorer import train_model
 from dotenv import load_dotenv
@@ -58,6 +58,7 @@ app.include_router(premium.router)
 app.include_router(claims.router)
 app.include_router(admin.router)
 app.include_router(mock.router)
+app.include_router(triggers.router)
 
 @app.get("/health")
 def health() -> dict:
