@@ -16,6 +16,7 @@ interface AuthContextType {
   verifyOtp: (phone: string, otp: string) => Promise<boolean>;
   logout: () => void;
   refetchUser: () => Promise<void>;
+  setUser: (user: User | null) => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -97,7 +98,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, verifyOtp, logout, refetchUser: fetchUser }}>
+    <AuthContext.Provider value={{ user, loading, login, verifyOtp, logout, refetchUser: fetchUser, setUser }}>
       {children}
     </AuthContext.Provider>
   );

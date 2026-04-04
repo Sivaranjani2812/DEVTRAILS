@@ -4,12 +4,14 @@ import { Check, Camera, ShieldAlert, ArrowRight, ArrowLeft, Shield } from "lucid
 import toast from "react-hot-toast";
 import { RadialBarChart, RadialBar, PolarAngleAxis, ResponsiveContainer } from "recharts";
 import axios from "axios";
+import { useAuth } from "../../context/AuthContext";
 
 const API = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
 const steps = ["Personal", "Work", "Risk", "KYC"];
 
 export default function Onboarding() {
   const navigate = useNavigate();
+  const { setUser } = useAuth();
   
   const [currentStep, setCurrentStep] = useState(1);
   const [loading, setLoading] = useState(false);
@@ -97,6 +99,7 @@ export default function Onboarding() {
           userObj.id = res.data.worker_id;
           localStorage.setItem("insure_gig_user", JSON.stringify(userObj));
           localStorage.setItem("userId", res.data.worker_id);
+          setUser(userObj);
       }
       
       toast.success("Registration complete! Policy activated.");

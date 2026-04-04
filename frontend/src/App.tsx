@@ -14,6 +14,7 @@ import AdminDemo from "./pages/AdminDemo/index";
 import NotFound from "./pages/NotFound";
 import { AuthProvider } from "./context/AuthContext";
 import { WorkerProvider } from "./context/WorkerContext";
+import Navbar from "./components/Navbar";
 
 const queryClient = new QueryClient();
 
@@ -27,6 +28,7 @@ const App = () => (
             error: { duration: 6000, style: { background: '#DC2626', color: 'white' } },
           }} />
           <BrowserRouter>
+            <Navbar />
             <AnimatePresence mode="wait">
               <Routes>
                 <Route path="/" element={<Landing />} />
