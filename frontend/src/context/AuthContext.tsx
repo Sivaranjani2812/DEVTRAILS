@@ -41,9 +41,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
     
     try {
-      const res = await api.get("/api/auth/me");
-      setUser(res.data);
-      localStorage.setItem("insure_gig_user", JSON.stringify(res.data));
+      // Mock /auth/me by just relying on the token for now, or fetch worker profile
+      const savedUser = localStorage.getItem("insure_gig_user");
+      if (savedUser) {
+          setUser(JSON.parse(savedUser));
+      }
     } catch (err) {
       console.error("Failed to fetch user", err);
       setUser(null);
@@ -60,7 +62,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const login = async (phone: string, role = "worker") => {
     try {
-      await api.post("/api/auth/send-otp", { phone, role });
+      // Mock sending OTP directly 
+      console.log(`Mock OTP sent to ${phone}`);
       return true;
     } catch (err) {
       console.error(err);
@@ -70,11 +73,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const verifyOtp = async (phone: string, otp: string) => {
     try {
-      const res = await api.post("/api/auth/verify-otp", { phone, otp });
-      const { access_token, user } = res.data;
+      const res = await api.post("/auth/verify-otp", { phone, otp, device_fingerprint: navigator.userAgent });
+      // The backend returns access_token, user_id, is_new_user
+      const { access_token, user_id, is_new_user } = res.data;
+      
+      const userObj = { id: user_id || 'new', phone, role: 'worker', onboarded: !is_new_user };
+      
       localStorage.setItem("insure_gig_token", access_token);
-      localStorage.setItem("insure_gig_user", JSON.stringify(user));
-      setUser(user);
+      localStorage.setItem("insure_gig_user", JSON.stringify(userObj));
+      setUser(userObj as any);
       return true;
     } catch (err) {
       console.error(err);

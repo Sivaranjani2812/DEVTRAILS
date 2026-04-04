@@ -4,17 +4,14 @@ import { Toaster } from "react-hot-toast";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { AnimatePresence } from "framer-motion";
 import Landing from "./pages/Landing";
-import Onboarding from "./pages/Onboarding";
-import Dashboard from "./pages/Dashboard";
-import Claims from "./pages/Claims";
-import Login from "./pages/Login";
-import AdminLogin from "./pages/AdminLogin";
-import Admin from "./pages/Admin";
-import Demo from "./pages/Demo";
+import Login from "./pages/Login/index";
+import Onboarding from "./pages/Onboarding/index";
+import Dashboard from "./pages/Dashboard/index";
+import Policy from "./pages/Policy/index";
+import PremiumCalculator from "./pages/PremiumCalculator/index";
+import Claims from "./pages/Claims/index";
+import AdminDemo from "./pages/AdminDemo/index";
 import NotFound from "./pages/NotFound";
-import RiskAnalysis from "./pages/RiskAnalysis";
-import Subscription from "./pages/Subscription";
-import Profile from "./pages/Profile";
 import { AuthProvider } from "./context/AuthContext";
 import { WorkerProvider } from "./context/WorkerContext";
 
@@ -26,24 +23,20 @@ const App = () => (
       <WorkerProvider>
         <TooltipProvider>
           <Toaster position="bottom-right" toastOptions={{
-            success: { style: { background: '#059669', color: 'white', duration: 4000 } },
-            error: { style: { background: '#DC2626', color: 'white', duration: 6000 } },
+            success: { duration: 4000, style: { background: '#059669', color: 'white' } },
+            error: { duration: 6000, style: { background: '#DC2626', color: 'white' } },
           }} />
           <BrowserRouter>
             <AnimatePresence mode="wait">
               <Routes>
                 <Route path="/" element={<Landing />} />
-                <Route path="/onboarding" element={<Onboarding />} />
-                <Route path="/risk" element={<RiskAnalysis />} />
-                <Route path="/subscription" element={<Subscription />} />
-                <Route path="/profile" element={<Profile />} />
-                <Route path="/dashboard" element={<Dashboard />} />
-                <Route path="/claims" element={<Claims />} />
                 <Route path="/login" element={<Login />} />
-                <Route path="/admin/login" element={<AdminLogin />} />
-                <Route path="/admin" element={<Admin />} />
-                <Route path="/demo" element={<Demo />} />
-                <Route path="*" element={<NotFound />} />
+                <Route path="/onboarding" element={<Onboarding />} />
+                <Route path="/dashboard" element={<Dashboard />} />
+                <Route path="/policy" element={<Policy />} />
+                <Route path="/premium" element={<PremiumCalculator />} />
+                <Route path="/claims" element={<Claims />} />
+                <Route path="/admin" element={<AdminDemo />} />
               </Routes>
             </AnimatePresence>
           </BrowserRouter>
